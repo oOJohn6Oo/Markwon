@@ -1,25 +1,20 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.linkify'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
 dependencies {
-    deps.with {
-        // To use LinkifyCompat
-        // note that this dependency must be added on a client side explicitly
-        compileOnly it['x-core']
-    }
-
+    // To use LinkifyCompat
+    // note that this dependency must be added on a client side explicitly
+    compileOnly  libs.x . core
     api project(':markwon-core')
 }
 

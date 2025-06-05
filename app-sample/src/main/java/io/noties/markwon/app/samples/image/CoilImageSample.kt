@@ -1,6 +1,7 @@
 package io.noties.markwon.app.samples.image
 
 import coil.ImageLoader
+import coil.memory.MemoryCache
 import coil.request.Disposable
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
@@ -85,8 +86,10 @@ class CoilImageSample : MarkwonTextViewSample() {
   val imageLoader: ImageLoader
     get() = ImageLoader.Builder(context)
       .apply {
-        availableMemoryPercentage(0.5)
-        bitmapPoolPercentage(0.5)
+        memoryCache { MemoryCache.Builder(context).maxSizePercent(0.5).build() }
+
+//        https://github.com/coil-kt/coil/discussions/1186
+//        bitmapPoolPercentage(0.5)
         crossfade(true)
       }
       .build()

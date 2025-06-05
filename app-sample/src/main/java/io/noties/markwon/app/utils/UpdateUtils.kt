@@ -34,7 +34,7 @@ object UpdateUtils {
 
                         override fun onResponse(call: Call, response: Response) {
                             try {
-                                val revision = response.body()?.string()?.trim()
+                                val revision = response.body?.string()?.trim()
                                 val hasUpdate = revision != null && BuildConfig.GIT_SHA != revision
                                 if (hasUpdate) {
                                     // revision is guarded by `hasUpdate` (includes null check)

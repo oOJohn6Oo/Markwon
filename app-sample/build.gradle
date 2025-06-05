@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 
 def gitSha = { ->
     def output = new ByteArrayOutputStream()
@@ -14,8 +14,9 @@ def gitSha = { ->
 
 android {
 
+    namespace "io.noties.markwon.app"
+
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         applicationId 'io.noties.markwon.app'
@@ -38,18 +39,13 @@ android {
         ]
     }
 
-    dexOptions {
-        preDexLibraries true
-        javaMaxHeapSize '5g'
-    }
-
     compileOptions {
-        targetCompatibility JavaVersion.VERSION_1_8
-        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     sourceSets {
@@ -68,37 +64,24 @@ android {
                 final def keystoreAlias = 'MARKWON_KEY_ALIAS'
                 final def keystoreAliasPassword = 'MARKWON_KEY_ALIAS_PASSWORD'
 
-                final def properties = [
-                        keystoreFilePassword,
-                        keystoreAlias,
-                        keystoreAliasPassword
-                ]
-
-                if (!keystoreFile.exists()) {
-                    throw new IllegalStateException("No '${keystoreFile.name}' file is found.")
-                }
-
-                final def missingProperties = properties.findAll { !project.hasProperty(it) }
-                if (!missingProperties.isEmpty()) {
-                    throw new IllegalStateException("Missing required signing properties: $missingProperties")
-                }
-
                 storeFile keystoreFile
-                storePassword project[keystoreFilePassword]
+                storePassword ""
 
-                keyAlias project[keystoreAlias]
-                keyPassword project[keystoreAliasPassword]
+                keyAlias ""
+                keyPassword ""
             }
         }
 
         buildTypes {
-            debug {
-                signingConfig signingConfigs.config
-            }
             release {
                 signingConfig signingConfigs.config
             }
         }
+    }
+
+    buildFeatures {
+        buildConfig true
+        viewBinding true
     }
 }
 
@@ -108,21 +91,13 @@ kapt {
     }
 }
 
-androidExtensions {
-    features = ["parcelize"]
-}
-
-configurations.all {
+configurations.configureEach {
     exclude group: 'org.jetbrains', module: 'annotations-java5'
 }
 
 dependencies {
     kapt project(':sample-utils:processor')
-    deps['annotationProcessor'].with {
-        kapt it['prism4j-bundler']
-    }
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    kapt libs.prism4j.bundler
 
     implementation project(':markwon-core')
     implementation project(':markwon-editor')
@@ -143,24 +118,20 @@ dependencies {
     implementation project(':markwon-image-glide')
     implementation project(':markwon-image-coil')
 
-    deps.with {
-//        implementation it['x-appcompat']
-        implementation it['x-recycler-view']
-        implementation it['x-cardview']
-        implementation it['x-fragment']
-        implementation it['okhttp']
-        implementation it['prism4j']
-        implementation it['gson']
-        implementation it['adapt']
-        implementation it['debug']
-        implementation it['android-svg']
-        implementation it['android-gif-impl']
-        implementation it['coil']
-    }
+//        implementation libs.x.appcompat
+    implementation libs.x.recyclerview
+    implementation libs.x.cardview
+    implementation libs.x.fragment
+    implementation libs.okhttp
+    implementation libs.prism4j
+    implementation libs.gson
+    implementation libs.adapt
+    implementation libs.debug
+    implementation libs.android.svg
+    implementation libs.android.gif.impl
+    implementation libs.coil
 
-    deps['test'].with {
-        testImplementation it['junit']
-        testImplementation it['robolectric']
-        testImplementation it['mockito']
-    }
+    testImplementation libs.junit
+    testImplementation libs.robolectric
+    testImplementation libs.mockito
 }

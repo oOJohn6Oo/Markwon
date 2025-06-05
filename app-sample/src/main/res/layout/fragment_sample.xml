@@ -7,6 +7,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/app_bar"
         style="@style/AppBarContainer"
         android:orientation="horizontal">
 
@@ -40,6 +41,7 @@
         android:background="@color/divider" />
 
     <LinearLayout
+        android:id="@+id/tab_bar"
         style="@style/TabBarContainer"
         tools:ignore="DisableBaselineAlignment">
 

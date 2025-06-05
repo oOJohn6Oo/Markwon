@@ -1,27 +1,23 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.inlineparser'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
 dependencies {
     api project(':markwon-core')
-    api deps['x-annotations']
-    api deps['commonmark']
+    api libs.x.annotations
+    api libs.commonmark
 
-    deps['test'].with {
-        testImplementation it['junit']
-        testImplementation it['commonmark-test-util']
-    }
+    testImplementation libs.junit
+    testImplementation  libs.commonmark.test.util
 }
 
 registerArtifact(this)

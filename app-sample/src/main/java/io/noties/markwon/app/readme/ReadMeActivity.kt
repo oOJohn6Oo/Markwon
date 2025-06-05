@@ -7,6 +7,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,9 +18,11 @@ import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonConfiguration
 import io.noties.markwon.MarkwonVisitor
 import io.noties.markwon.app.R
+import io.noties.markwon.app.databinding.ActivityReadMeBinding
 import io.noties.markwon.app.utils.ReadMeUtils
 import io.noties.markwon.app.utils.hidden
 import io.noties.markwon.app.utils.loadReadMe
+import io.noties.markwon.app.utils.safeDrawing
 import io.noties.markwon.app.utils.textOrHide
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tasklist.TaskListPlugin
@@ -45,10 +49,12 @@ import java.io.IOException
 class ReadMeActivity : Activity() {
 
     private lateinit var progressBar: View
+    private lateinit var mBinding: ActivityReadMeBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_read_me)
+        mBinding = ActivityReadMeBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
 
         progressBar = findViewById(R.id.progress_bar)
 
@@ -59,6 +65,21 @@ class ReadMeActivity : Activity() {
         initAppBar(data)
 
         initRecyclerView(data)
+
+        ViewCompat.setOnApplyWindowInsetsListener(mBinding.root) {v,insets->
+            val safeDrawing = insets.safeDrawing(false)
+            mBinding.appBar.updatePaddingRelative(
+                top = safeDrawing.top,
+                start = safeDrawing.left,
+                end = safeDrawing.right,
+            )
+            mBinding.recyclerView.updatePaddingRelative(
+                bottom = safeDrawing.bottom,
+                start = safeDrawing.left,
+                end = safeDrawing.right,
+            )
+            insets
+        }
     }
 
     private val markwon: Markwon
@@ -165,7 +186,7 @@ class ReadMeActivity : Activity() {
                     }
 
                     override fun onResponse(call: Call, response: Response) {
-                        val md = response.body()?.string() ?: ""
+                        val md = response.body?.string() ?: ""
                         callback.invoke(Result.Success(md))
                     }
                 })

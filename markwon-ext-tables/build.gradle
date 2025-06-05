@@ -1,25 +1,20 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.ext.tables'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
 dependencies {
 
     api project(':markwon-core')
-
-    deps.with {
-        api it['commonmark-table']
-    }
+    api libs.commonmark.table
 }
 
 registerArtifact(this)

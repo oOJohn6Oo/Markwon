@@ -63,7 +63,7 @@ class VersionItem : Item<VersionItem.Holder>(42L) {
         return Holder(inflater.inflate(R.layout.adapt_version, parent, false))
     }
 
-    override fun render(holder: Holder) {
+    override fun bind(holder: Holder) {
         markwon.setParsedMarkdown(holder.textView, text)
     }
 

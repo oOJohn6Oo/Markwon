@@ -36,7 +36,7 @@ class SampleItem(
         }
     }
 
-    override fun render(holder: Holder) {
+    override fun bind(holder: Holder) {
         holder.apply {
             title.text = sample.title
 
@@ -69,7 +69,7 @@ class SampleItem(
                         }
                     }
 
-            itemView.setOnClickListener {
+            holder.itemView().setOnClickListener {
                 onSampleClick(sample)
             }
         }

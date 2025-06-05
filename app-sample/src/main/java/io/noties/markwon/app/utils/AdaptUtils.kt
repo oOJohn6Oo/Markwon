@@ -1,10 +1,10 @@
 package io.noties.markwon.app.utils
 
 import androidx.recyclerview.widget.RecyclerView
-import io.noties.adapt.Adapt
+import io.noties.adapt.recyclerview.AdaptRecyclerView
 import io.noties.debug.Debug
 
-val Adapt.recyclerView: RecyclerView?
+val AdaptRecyclerView.recyclerView: RecyclerView?
     get() {
         // internally throws if recycler is not present (detached from recyclerView)
         return try {

@@ -1,25 +1,20 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.syntax'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
 dependencies {
 
     api project(':markwon-core')
-
-    deps.with {
-        api it['prism4j']
-    }
+    api libs.prism4j
 }
 
 registerArtifact(this)

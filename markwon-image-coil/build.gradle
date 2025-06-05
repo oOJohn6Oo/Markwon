@@ -1,15 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.image.coil'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
@@ -18,8 +16,8 @@ dependencies {
 
     // @since 4.5.1 declare `coil-base` as api dependency (would require users
     //  to have explicit coil dependency)
-    api deps['coil-base']
-    compileOnly deps['coil']
+    api   libs.coil.base
+    compileOnly  libs.coil
 }
 
 registerArtifact(this)

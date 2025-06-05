@@ -2,6 +2,9 @@ package io.noties.markwon.app.sample
 
 import android.os.Bundle
 import android.view.Window
+import android.window.OnBackInvokedCallback
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import io.noties.debug.Debug
@@ -11,8 +14,16 @@ import io.noties.markwon.app.sample.ui.SampleListFragment
 
 class MainActivity : FragmentActivity() {
 
+    private val mOnBackPressedCallback = object : OnBackPressedCallback(true){
+        override fun handleOnBackPressed() {
+            supportFragmentManager.popBackStack()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onBackPressedDispatcher.addCallback(this, mOnBackPressedCallback)
+        enableEdgeToEdge()
 
         if (supportFragmentManager.findFragmentById(Window.ID_ANDROID_CONTENT) == null) {
 
@@ -38,5 +49,9 @@ class MainActivity : FragmentActivity() {
                         .commit()
             }
         }
+    }
+
+    fun stopBackPress(stop: Boolean){
+        mOnBackPressedCallback.isEnabled = stop
     }
 }

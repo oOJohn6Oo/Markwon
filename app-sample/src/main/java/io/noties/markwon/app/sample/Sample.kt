@@ -2,7 +2,7 @@ package io.noties.markwon.app.sample
 
 import android.os.Parcelable
 import io.noties.markwon.sample.annotations.MarkwonArtifact
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Sample(

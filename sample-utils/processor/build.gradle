@@ -1,16 +1,16 @@
 apply plugin: 'java-library'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 sourceSets {
     main.java.srcDirs += '../annotations'
 }
 
 dependencies {
-    deps.with {
-        implementation it['x-annotations']
-        implementation it['gson']
-        implementation it['commons-io']
-    }
+    implementation libs.x.annotations
+    implementation libs.gson
+    implementation libs.commons.io
 }

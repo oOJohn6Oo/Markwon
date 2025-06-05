@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="io.noties.markwon.app">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -10,12 +9,13 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:enableOnBackInvokedCallback="true"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
-        <activity android:name=".sample.MainActivity">
+        <activity android:name=".sample.MainActivity" android:exported="true">
             <!-- launcher intent -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,21 +38,21 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="noties.io"
-                    android:scheme="https" />
+                <data android:scheme="https" />
+                <data android:host="noties.io" />
 
                 <data android:pathPrefix="/Markwon/app"/>
 
-                <data android:pathPattern="sample/.*" />
-                <data android:pathPattern="search" />
+                <data android:pathPattern="/sample/.*" />
+                <data android:pathPattern="/search" />
 
             </intent-filter>
         </activity>
 
         <activity
             android:name=".readme.ReadMeActivity"
-            android:exported="true">
+            android:exported="true"
+            tools:targetApi="33">
 
             <!-- github markdown files handling -->
             <intent-filter>
@@ -61,9 +61,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="github.com"
-                    android:scheme="https" />
+                <data android:scheme="https" />
+                <data android:host="github.com" />
 
                 <data android:pathPattern=".*\\.md" />
                 <data android:pathPattern=".*\\..*\\.md" />

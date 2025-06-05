@@ -1,15 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.html'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
@@ -17,20 +15,16 @@ dependencies {
 
     api project(':markwon-core')
 
-    deps.with {
-        // add a compileOnly dependency, so if this artifact is present
-        // we will try to obtain a SpanFactory for a Strikethrough node and use
-        // it to be consistent with markdown (please note that we do not use markwon plugin
-        // for that in case if different implementation is used)
-        compileOnly it['commonmark-strikethrough']
+    // add a compileOnly dependency, so if this artifact is present
+    // we will try to obtain a SpanFactory for a Strikethrough node and use
+    // it to be consistent with markdown (please note that we do not use markwon plugin
+    // for that in case if different implementation is used)
+    compileOnly  libs.commonmark.strikethrough
 
-        testImplementation it['ix-java']
-    }
+    testImplementation libs.ix.java
 
-    deps.test.with {
-        testImplementation it['junit']
-        testImplementation it['robolectric']
-    }
+    testImplementation libs.junit
+    testImplementation libs.robolectric
 }
 
 registerArtifact(this)

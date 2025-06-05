@@ -13,18 +13,23 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.os.BundleCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.updatePaddingRelative
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.noties.adapt.Adapt
-import io.noties.adapt.DiffUtilDataSetChanged
 import io.noties.adapt.Item
+import io.noties.adapt.recyclerview.AdaptRecyclerView
+import io.noties.adapt.recyclerview.DiffUtilDataSetChangedHandler
 import io.noties.debug.Debug
 import io.noties.markwon.Markwon
 import io.noties.markwon.app.App
 import io.noties.markwon.app.BuildConfig
 import io.noties.markwon.app.R
+import io.noties.markwon.app.databinding.FragmentSampleListBinding
 import io.noties.markwon.app.readme.ReadMeActivity
 import io.noties.markwon.app.sample.Sample
 import io.noties.markwon.app.sample.SampleManager
@@ -38,20 +43,25 @@ import io.noties.markwon.app.utils.displayName
 import io.noties.markwon.app.utils.hidden
 import io.noties.markwon.app.utils.onPreDraw
 import io.noties.markwon.app.utils.recyclerView
+import io.noties.markwon.app.utils.safeDrawing
 import io.noties.markwon.app.utils.stackTraceString
 import io.noties.markwon.app.utils.tagDisplayName
 import io.noties.markwon.app.widget.SearchBar
 import io.noties.markwon.movement.MovementMethodPlugin
 import io.noties.markwon.sample.annotations.MarkwonArtifact
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
+import androidx.core.net.toUri
+import io.noties.markwon.app.sample.MainActivity
+import io.noties.markwon.app.utils.vdp
+import androidx.core.view.isNotEmpty
 
 class SampleListFragment : Fragment() {
 
-    private val adapt: Adapt = Adapt.create(DiffUtilDataSetChanged.create())
+    private lateinit var adapt: AdaptRecyclerView
     private lateinit var markwon: Markwon
 
     private val type: Type by lazy(LazyThreadSafetyMode.NONE) {
-        parseType(arguments!!)
+        parseType(requireArguments())
     }
 
     private var search: String? = null
@@ -62,7 +72,9 @@ class SampleListFragment : Fragment() {
     private var cancellable: Cancellable? = null
     private var checkForUpdateCancellable: Cancellable? = null
 
-    private lateinit var progressBar: View
+
+    private var _mBinding: FragmentSampleListBinding? = null
+    private val mBinding get() = _mBinding!!
 
     private val versionItem: VersionItem by lazy(LazyThreadSafetyMode.NONE) {
         VersionItem()
@@ -80,7 +92,8 @@ class SampleListFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_sample_list, container, false)
+        _mBinding = FragmentSampleListBinding.inflate(inflater, container, false)
+        return mBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -89,8 +102,6 @@ class SampleListFragment : Fragment() {
         initAppBar(view)
 
         val context = requireContext()
-
-        progressBar = view.findViewById(R.id.progress_bar)
 
         val searchBar: SearchBar = view.findViewById(R.id.search_bar)
         searchBar.onSearchListener = {
@@ -102,7 +113,9 @@ class SampleListFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.itemAnimator = DefaultItemAnimator()
         recyclerView.setHasFixedSize(true)
-        recyclerView.adapter = adapt
+        adapt = AdaptRecyclerView.init(recyclerView){
+            it.dataSetChangeHandler(DiffUtilDataSetChangedHandler.create(true))
+        }
 
 //        // additional padding for RecyclerView
         // greatly complicates state restoration (items jump and a lot of times state cannot be
@@ -116,7 +129,12 @@ class SampleListFragment : Fragment() {
 //            )
 //        }
 
-        val state: State? = arguments?.getParcelable(STATE)
+        val state: State? = arguments?.let {
+            BundleCompat.getParcelable(
+                it,
+                STATE,
+                State::class.java
+            ) }
         val initialSearch = arguments?.getString(ARG_SEARCH)
 
         // clear it anyway
@@ -133,6 +151,25 @@ class SampleListFragment : Fragment() {
             searchBar.search(search)
         } else {
             fetch()
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v,insets->
+            val safeDrawing = insets.safeDrawing(false)
+            mBinding.appBar.updatePaddingRelative(
+                top = safeDrawing.top,
+                start = safeDrawing.left,
+                end = safeDrawing.right
+            )
+            mBinding.searchBar.updatePaddingRelative(
+                start = safeDrawing.left + 8.vdp,
+                end = safeDrawing.right + 8.vdp,
+            )
+            mBinding.recyclerView.updatePaddingRelative(
+                bottom = safeDrawing.bottom + 12.vdp,
+                start = safeDrawing.left,
+                end = safeDrawing.right
+            )
+            insets
         }
     }
 
@@ -172,7 +209,7 @@ class SampleListFragment : Fragment() {
         val appBarTitle: TextView = appBar.findViewById(R.id.app_bar_title)
         val appBarIconReadme: ImageView = appBar.findViewById(R.id.app_bar_icon_readme)
 
-        val isInitialScreen = fragmentManager?.backStackEntryCount == 0
+        val isInitialScreen = parentFragmentManager.backStackEntryCount == 0
 
         appBarIcon.hidden = isInitialScreen
         appBarIconReadme.hidden = !isInitialScreen
@@ -257,9 +294,9 @@ class SampleListFragment : Fragment() {
             return
         }
 
-        progressBar.hidden = false
+        mBinding.progressBar.hidden = false
         checkForUpdateCancellable = UpdateUtils.checkForUpdate { result ->
-            progressBar.post {
+            mBinding.progressBar.post {
                 processUpdateResult(result)
             }
         }
@@ -268,7 +305,7 @@ class SampleListFragment : Fragment() {
     private fun processUpdateResult(result: UpdateUtils.Result) {
         val context = context ?: return
 
-        progressBar.hidden = true
+        mBinding.progressBar.hidden = true
 
         val builder = AlertDialog.Builder(context)
 
@@ -284,7 +321,7 @@ class SampleListFragment : Fragment() {
                 builder.setMessage(markwon.toMarkdown(md))
                 builder.setNegativeButton(android.R.string.cancel, null)
                 builder.setPositiveButton("Download") { _, _ ->
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.url))
+                    val intent = Intent(Intent.ACTION_VIEW, result.url.toUri())
                     startActivity(Intent.createChooser(intent, null))
                 }
             }
@@ -333,7 +370,7 @@ ${result.throwable.stackTraceString()}
     }
 
     private fun openFragment(fragment: Fragment) {
-        fragmentManager!!.beginTransaction()
+        parentFragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.screen_in, R.anim.screen_out, R.anim.screen_in_pop, R.anim.screen_out_pop)
                 .replace(Window.ID_ANDROID_CONTENT, fragment)
                 .addToBackStack(null)
@@ -398,6 +435,7 @@ ${result.throwable.stackTraceString()}
                 when (search) {
                     is SampleSearch.Artifact -> putString(ARG_ARTIFACT, search.artifact.name)
                     is SampleSearch.Tag -> putString(ARG_TAG, search.tag)
+                    else -> {}
                 }
 
                 val query = search.text
@@ -447,7 +485,7 @@ ${result.throwable.stackTraceString()}
 
     // because findViewHolderForLayoutPosition doesn't work :'(
     private fun RecyclerView.findFirstVisibleViewHolder(): RecyclerView.ViewHolder? {
-        if (childCount > 0) {
+        if (isNotEmpty()) {
             val child = getChildAt(0)
             return findContainingViewHolder(child)
         }
@@ -458,5 +496,15 @@ ${result.throwable.stackTraceString()}
         class Artifact(val artifact: MarkwonArtifact) : Type()
         class Tag(val tag: String) : Type()
         object All : Type()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (requireActivity() as MainActivity).stopBackPress(false)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        (requireActivity() as MainActivity).stopBackPress(true)
     }
 }

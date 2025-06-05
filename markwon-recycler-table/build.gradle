@@ -1,15 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.recycler.table'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
@@ -19,11 +17,9 @@ dependencies {
     api project(':markwon-recycler')
     api project(':markwon-ext-tables')
 
-    deps['test'].with {
-        testImplementation it['junit']
-        testImplementation it['robolectric']
-        testImplementation it['mockito']
-    }
+    testImplementation libs.junit
+    testImplementation libs.robolectric
+    testImplementation libs.mockito
 }
 
 registerArtifact(this)

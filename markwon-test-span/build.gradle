@@ -1,24 +1,19 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.test'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
 dependencies {
 
-    api deps['x-annotations']
-    api deps['ix-java']
-
-    deps['test'].with {
-        api it['junit']
-    }
+    api  libs.x.annotations
+    api  libs.ix.java
+    api libs.junit
 }

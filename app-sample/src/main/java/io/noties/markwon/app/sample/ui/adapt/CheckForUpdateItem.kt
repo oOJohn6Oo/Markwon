@@ -12,7 +12,7 @@ class CheckForUpdateItem(private val action: () -> Unit) : Item<CheckForUpdateIt
         return Holder(inflater.inflate(R.layout.adapt_check_for_update, parent, false))
     }
 
-    override fun render(holder: Holder) {
+    override fun bind(holder: Holder) {
         holder.button.setOnClickListener { action() }
     }
 

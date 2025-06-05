@@ -1,21 +1,19 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.image.picasso'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
 dependencies {
     api project(':markwon-core')
-    api deps['picasso']
+    api  libs.picasso
 }
 
 registerArtifact(this)

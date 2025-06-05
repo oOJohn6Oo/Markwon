@@ -1,15 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'io.noties.markwon.ext.strikethrough'
 
     compileSdkVersion config['compile-sdk']
-    buildToolsVersion config['build-tools']
 
     defaultConfig {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
-        versionCode 1
-        versionName version
     }
 }
 
@@ -17,19 +15,14 @@ dependencies {
 
     api project(':markwon-core')
 
-    deps.with {
-        api it['commonmark-strikethrough']
+    api libs.commonmark.strikethrough
 
-        // NB! ix-java dependency to be used in tests
-        testImplementation it['ix-java']
-    }
-
-    deps.test.with {
-        testImplementation project(':markwon-test-span')
-        testImplementation it['junit']
-        testImplementation it['mockito']
-        testImplementation it['robolectric']
-    }
+    // NB! ix-java dependency to be used in tests
+    testImplementation libs.ix.java
+    testImplementation project(':markwon-test-span')
+    testImplementation libs.junit
+    testImplementation libs.mockito
+    testImplementation libs.robolectric
 }
 
 registerArtifact(this)

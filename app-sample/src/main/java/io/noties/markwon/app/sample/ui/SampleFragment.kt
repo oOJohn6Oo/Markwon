@@ -5,30 +5,51 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.view.updatePaddingRelative
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import io.noties.markwon.app.R
+import io.noties.markwon.app.databinding.FragmentSampleBinding
+import io.noties.markwon.app.databinding.FragmentSampleListBinding
 import io.noties.markwon.app.sample.Sample
 import io.noties.markwon.app.utils.active
+import io.noties.markwon.app.utils.safeDrawing
 
 class SampleFragment : Fragment() {
 
-    private lateinit var container: ViewGroup
-
     private var isCodeSelected = false
 
+    private var _mBinding: FragmentSampleBinding? = null
+    private val mBinding get() = _mBinding!!
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_sample, container, false)
+        _mBinding = FragmentSampleBinding.inflate(inflater, container, false)
+        return mBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        container = view.findViewById(R.id.container)
         isCodeSelected = savedInstanceState?.getBoolean(KEY_CODE_SELECTED) ?: false
 
         initAppBar(view)
         initTabBar(view)
+
+        ViewCompat.setOnApplyWindowInsetsListener(view) {v,insets->
+            val safeDrawing = insets.safeDrawing(false)
+            mBinding.appBar.updatePaddingRelative(
+                top = safeDrawing.top,
+                start = safeDrawing.left,
+                end = safeDrawing.right
+            )
+            mBinding.tabBar.updatePaddingRelative(
+                bottom = safeDrawing.bottom,
+                start = safeDrawing.left,
+                end = safeDrawing.right
+            )
+            insets
+        }
     }
 
     private fun initAppBar(view: View) {
@@ -96,7 +117,7 @@ class SampleFragment : Fragment() {
             if (existing != null) {
                 show(existing)
             } else {
-                add(container.id, provider(), showTag)
+                add(mBinding.container.id, provider(), showTag)
             }
 
             manager.findFragmentByTag(hideTag)?.also {
@@ -114,7 +135,7 @@ class SampleFragment : Fragment() {
     }
 
     private val sample: Sample by lazy(LazyThreadSafetyMode.NONE) {
-        val temp: Sample = (arguments!!.getParcelable(ARG_SAMPLE))!!
+        val temp: Sample = (requireArguments().getParcelable(ARG_SAMPLE))!!
         temp
     }
 

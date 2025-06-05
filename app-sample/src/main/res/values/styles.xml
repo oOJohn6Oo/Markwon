@@ -13,9 +13,9 @@
     <style name="AppTheme" parent="AppThemeBase" />
 
     <style name="AppBarContainer">
-        <item name="android:id">@id/app_bar</item>
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/app_bar_height</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/app_bar_height</item>
         <item name="android:background">@color/gray_light</item>
         <item name="android:elevation">4dip</item>
     </style>
@@ -64,9 +64,9 @@
     </style>
 
     <style name="TabBarContainer">
-        <item name="android:id">@id/tab_bar</item>
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/tab_bar_height</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/tab_bar_height</item>
         <item name="android:background">@color/tab_bar_background</item>
         <item name="android:baselineAligned">false</item>
         <item name="android:orientation">horizontal</item>
@@ -74,7 +74,7 @@
 
     <style name="TabBarItem">
         <item name="android:layout_width">0px</item>
-        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_height">@dimen/tab_bar_height</item>
         <item name="android:layout_weight">1</item>
         <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
         <item name="android:gravity">center</item>

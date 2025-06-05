@@ -7,12 +7,15 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/app_bar"
         style="@style/AppBarContainer"
+        android:baselineAligned="false"
         android:orientation="horizontal">
 
         <FrameLayout
             android:layout_width="@dimen/app_bar_height"
-            android:layout_height="@dimen/app_bar_height">
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/app_bar_height">
 
             <ImageView
                 style="@style/AppBarIcon"
