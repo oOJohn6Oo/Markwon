@@ -42,7 +42,6 @@ import io.noties.markwon.app.utils.UpdateUtils
 import io.noties.markwon.app.utils.displayName
 import io.noties.markwon.app.utils.hidden
 import io.noties.markwon.app.utils.onPreDraw
-import io.noties.markwon.app.utils.recyclerView
 import io.noties.markwon.app.utils.safeDrawing
 import io.noties.markwon.app.utils.stackTraceString
 import io.noties.markwon.app.utils.tagDisplayName
@@ -91,7 +90,7 @@ class SampleListFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _mBinding = FragmentSampleListBinding.inflate(inflater, container, false)
         return mBinding.root
     }
@@ -177,7 +176,7 @@ class SampleListFragment : Fragment() {
 
         val state = State(
                 search,
-                adapt.recyclerView?.scrollPosition
+                adapt.recyclerView()?.scrollPosition
         )
         Debug.i(state)
         arguments?.putParcelable(STATE, state)
@@ -238,7 +237,7 @@ class SampleListFragment : Fragment() {
         } else {
             appBarIcon.setImageResource(R.drawable.ic_arrow_back_white_24dp)
             appBarIcon.setOnClickListener {
-                requireActivity().onBackPressed()
+                requireActivity().onBackPressedDispatcher.onBackPressed()
             }
         }
     }
@@ -269,7 +268,7 @@ class SampleListFragment : Fragment() {
 
         adapt.setItems(items)
 
-        val recyclerView = adapt.recyclerView ?: return
+        val recyclerView = adapt.recyclerView() ?: return
 
         val scrollPosition = pendingRecyclerScrollPosition
 
@@ -478,7 +477,7 @@ ${result.throwable.stackTraceString()}
     private val RecyclerView.scrollPosition: RecyclerScrollPosition?
         get() {
             val holder = findFirstVisibleViewHolder() ?: return null
-            val position = holder.adapterPosition
+            val position = holder.bindingAdapterPosition
             val offset = holder.itemView.top
             return RecyclerScrollPosition(position, offset)
         }

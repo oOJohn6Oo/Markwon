@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
 import io.noties.markwon.app.App
 import io.noties.markwon.app.R
@@ -57,8 +58,7 @@ class SampleCodeFragment : Fragment() {
     }
 
     private val sample: Sample by lazy(LazyThreadSafetyMode.NONE) {
-        val temp: Sample = (arguments!!.getParcelable(ARG_SAMPLE))!!
-        temp
+        BundleCompat.getParcelable(requireArguments(), ARG_SAMPLE, Sample::class.java)!!
     }
 
     companion object {

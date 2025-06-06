@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.os.BundleCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.updatePaddingRelative
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import io.noties.markwon.app.R
 import io.noties.markwon.app.databinding.FragmentSampleBinding
-import io.noties.markwon.app.databinding.FragmentSampleListBinding
 import io.noties.markwon.app.sample.Sample
 import io.noties.markwon.app.utils.active
 import io.noties.markwon.app.utils.safeDrawing
@@ -23,7 +23,11 @@ class SampleFragment : Fragment() {
     private var _mBinding: FragmentSampleBinding? = null
     private val mBinding get() = _mBinding!!
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _mBinding = FragmentSampleBinding.inflate(inflater, container, false)
         return mBinding.root
     }
@@ -58,7 +62,7 @@ class SampleFragment : Fragment() {
         val title: TextView = appBar.findViewById(R.id.app_bar_title)
 
         icon.setOnClickListener {
-            activity?.onBackPressed()
+            activity?.onBackPressedDispatcher?.onBackPressed()
         }
 
         title.text = sample.title
@@ -135,8 +139,7 @@ class SampleFragment : Fragment() {
     }
 
     private val sample: Sample by lazy(LazyThreadSafetyMode.NONE) {
-        val temp: Sample = (requireArguments().getParcelable(ARG_SAMPLE))!!
-        temp
+        BundleCompat.getParcelable(requireArguments(), ARG_SAMPLE, Sample::class.java)!!
     }
 
     companion object {

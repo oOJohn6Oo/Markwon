@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.activity.OnBackPressedDispatcher
 import androidx.core.view.ViewCompat
 import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -113,7 +114,9 @@ class ReadMeActivity : Activity() {
 
     private fun initAppBar(data: Uri?) {
         val appBar = findViewById<View>(R.id.app_bar)
-        appBar.findViewById<View>(R.id.app_bar_icon).setOnClickListener { onBackPressed() }
+        appBar.findViewById<View>(R.id.app_bar_icon).setOnClickListener {
+            finish()
+        }
 
         val (title: String, subtitle: String?) = if (data == null) {
             Pair("README.md", null)

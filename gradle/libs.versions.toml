@@ -57,4 +57,4 @@ dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = 
 junit = { module = "junit:junit", version.ref = "junit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-commonmark-test-util = { module = "org.commonmark:commonmark-test-util", version.ref = "commonmark" }
+commonmark-test-util = { module = "org.commonmark:commonmark-test-util", version = "0.24.0" }

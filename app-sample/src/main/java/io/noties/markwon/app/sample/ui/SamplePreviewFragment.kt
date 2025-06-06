@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
 import io.noties.markwon.app.sample.Sample
 
@@ -20,8 +21,8 @@ class SamplePreviewFragment : Fragment() {
     }
 
     private val markwonSample: MarkwonSample by lazy(LazyThreadSafetyMode.NONE) {
-        val sample: Sample = arguments!!.getParcelable<Sample>(ARG_SAMPLE)!!
-        Class.forName(sample.javaClassName).newInstance() as MarkwonSample
+        val sample = BundleCompat.getParcelable(requireArguments(), ARG_SAMPLE, Sample::class.java)!!
+        Class.forName(sample.javaClassName).getDeclaredConstructor().newInstance() as MarkwonSample
     }
 
     companion object {
