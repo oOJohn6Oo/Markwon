@@ -291,6 +291,10 @@ ___
 
 Underscores (`_`)
 
+## Latex
+
+$$f(x) = \frac{d}{dx}\left[ (3x^2 + 2x + 1)^5 \cdot \sin(2x + 1) \right] = 5(3x^2 + 2x + 1)^4 \cdot (6x + 2) \cdot \sin(2x + 1) + (3x^2 + 2x + 1)^5 \cdot 2 \cos(2x + 1)$$
+
 
 ## License
 

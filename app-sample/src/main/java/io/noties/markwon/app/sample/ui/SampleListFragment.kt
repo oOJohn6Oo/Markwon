@@ -229,10 +229,11 @@ class SampleListFragment : Fragment() {
 
         if (isInitialScreen) {
             appBarIconReadme.setOnClickListener {
-                context?.let {
-                    val intent = ReadMeActivity.makeIntent(it)
-                    it.startActivity(intent)
-                }
+                requireActivity().startActivity(ReadMeActivity.makeIntent(it.context, false))
+            }
+            appBarIconReadme.setOnLongClickListener {
+                requireActivity().startActivity(ReadMeActivity.makeIntent(it.context, true))
+                true
             }
         } else {
             appBarIcon.setImageResource(R.drawable.ic_arrow_back_white_24dp)

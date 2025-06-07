@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:clipChildren="false"
     android:orientation="vertical">
 
@@ -17,7 +18,8 @@
             tools:ignore="ContentDescription" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="match_parent"
             android:layout_marginEnd="@dimen/content_padding"
             android:gravity="center_vertical"
@@ -44,6 +46,29 @@
 
         </LinearLayout>
 
+        <FrameLayout
+            android:id="@+id/seek_bar_container"
+            android:layout_width="160dp"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/seek_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp"
+                tools:text="Speed: 80"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/seek_bar"
+                android:layout_width="160dp"
+                android:max="199"
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp" />
+        </FrameLayout>
+
     </LinearLayout>
 
     <FrameLayout
@@ -56,9 +81,22 @@
             android:layout_height="match_parent"
             android:clipChildren="false"
             android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:orientation="vertical"
             android:overScrollMode="never"
             android:paddingTop="@dimen/content_padding"
             android:paddingBottom="36dip" />
+
+        <ScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/sse_markwon"
+                android:padding="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </ScrollView>
 
         <ProgressBar
             android:id="@+id/progress_bar"

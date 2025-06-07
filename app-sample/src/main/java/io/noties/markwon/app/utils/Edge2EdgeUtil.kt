@@ -4,6 +4,8 @@ import android.content.res.Resources
 import android.util.TypedValue
 import androidx.core.graphics.Insets
 import androidx.core.view.WindowInsetsCompat
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Proxy
 import kotlin.math.roundToInt
 
 val Int.vdp
@@ -42,4 +44,15 @@ fun Insets.union(other: Insets): Insets {
         maxOf(this.right, other.right),
         maxOf(this.bottom, other.bottom)
     )
+}
+
+internal inline fun <reified T : Any> noOpDelegate(): T {
+    val javaClass = T::class.java
+    return Proxy.newProxyInstance(
+        javaClass.classLoader, arrayOf(javaClass), NO_OP_HANDLER
+    ) as T
+}
+
+private val NO_OP_HANDLER = InvocationHandler { _, _, _ ->
+    // no op
 }
