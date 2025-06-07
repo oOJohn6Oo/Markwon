@@ -32,7 +32,7 @@ public abstract class ImageItem {
      * @since 4.0.0
      */
     @NonNull
-    public static ImageItem withDecodingNeeded(
+    public static ImageItem.WithDecodingNeeded withDecodingNeeded(
             @Nullable String contentType,
             @NonNull InputStream inputStream) {
         return new WithDecodingNeeded(contentType, inputStream);
@@ -113,11 +113,20 @@ public abstract class ImageItem {
         private final String contentType;
         private final InputStream inputStream;
 
+        private Drawable cachedDrawable;
+
+        private boolean isProcessing = true;
+
         private WithDecodingNeeded(
                 @Nullable String contentType,
-                @NonNull InputStream inputStream) {
+                @Nullable InputStream inputStream) {
             this.contentType = contentType;
             this.inputStream = inputStream;
+        }
+
+        public WithDecodingNeeded(){
+            contentType = null;
+            inputStream = null;
         }
 
         @Nullable
@@ -125,7 +134,7 @@ public abstract class ImageItem {
             return contentType;
         }
 
-        @NonNull
+        @Nullable
         public InputStream inputStream() {
             return inputStream;
         }
@@ -150,6 +159,20 @@ public abstract class ImageItem {
         @Override
         public WithDecodingNeeded getAsWithDecodingNeeded() {
             return this;
+        }
+
+        @Nullable
+        public Drawable getCachedDrawable() {
+            return cachedDrawable;
+        }
+
+        public void setCachedDrawable(Drawable cachedDrawable) {
+            this.cachedDrawable = cachedDrawable;
+            this.isProcessing = false;
+        }
+
+        public boolean isProcessing() {
+            return isProcessing;
         }
     }
 }

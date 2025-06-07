@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -92,49 +93,25 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
 
                     final String scheme = uri.getScheme();
                     if (scheme == null
-                            || scheme.length() == 0) {
+                            || scheme.isEmpty()) {
                         throw new IllegalStateException("No scheme is found: " + destination);
                     }
 
                     // obtain scheme handler
                     final SchemeHandler schemeHandler = schemeHandlers.get(scheme);
-                    if (schemeHandler != null) {
-
-                        // handle scheme
-                        final ImageItem imageItem = schemeHandler.handle(destination, uri);
-
-                        // if resulting imageItem needs further decoding -> proceed
-                        if (imageItem.hasDecodingNeeded()) {
-
-                            final ImageItem.WithDecodingNeeded withDecodingNeeded = imageItem.getAsWithDecodingNeeded();
-
-                            // @since 4.6.2 close input stream
-                            try {
-                                MediaDecoder mediaDecoder = mediaDecoders.get(withDecodingNeeded.contentType());
-
-                                if (mediaDecoder == null) {
-                                    mediaDecoder = defaultMediaDecoder;
-                                }
-
-                                if (mediaDecoder != null) {
-                                    drawable = mediaDecoder.decode(withDecodingNeeded.contentType(), withDecodingNeeded.inputStream());
-                                } else {
-                                    // throw that no media decoder is found
-                                    throw new IllegalStateException("No media-decoder is found: " + destination);
-                                }
-                            } finally {
-                                try {
-                                    withDecodingNeeded.inputStream().close();
-                                } catch (IOException e) {
-                                    Log.e("MARKWON-IMAGE", "Error closing inputStream", e);
-                                }
-                            }
-                        } else {
-                            drawable = imageItem.getAsWithResult().result();
-                        }
-                    } else {
+                    if(schemeHandler == null){
                         // throw no scheme handler is available
                         throw new IllegalStateException("No scheme-handler is found: " + destination);
+                    }
+
+                    // handle scheme
+                    final ImageItem imageItem = schemeHandler.handle(destination, uri);
+
+                    // if resulting imageItem needs further decoding -> proceed
+                    if (!imageItem.hasDecodingNeeded()) {
+                        drawable = imageItem.getAsWithResult().result();
+                    } else {
+                        drawable = proceedAndDecodeImage(imageItem, destination);
                     }
 
                 } catch (Throwable t) {
@@ -152,11 +129,11 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
                 if (out != null) {
                     final Rect bounds = out.getBounds();
                     //noinspection ConstantConditions
-                    if (bounds == null
-                            || bounds.isEmpty()) {
+                    if (bounds == null || bounds.isEmpty()) {
                         DrawableUtils.applyIntrinsicBounds(out);
                     }
                 }
+
 
                 handler.postAtTime(new Runnable() {
                     @Override
@@ -175,5 +152,49 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
                 }, asyncDrawable, SystemClock.uptimeMillis());
             }
         });
+    }
+
+    /**
+     * @throws IllegalStateException If Failed to decode
+     */
+    private Drawable proceedAndDecodeImage(@NonNull ImageItem imageItem, String destination) {
+        Drawable resDrawable;
+
+        // Get in cache
+        final ImageItem.WithDecodingNeeded withDecodingNeeded = imageItem.getAsWithDecodingNeeded();
+        resDrawable = withDecodingNeeded.getCachedDrawable();
+        if (resDrawable != null) return resDrawable;
+
+        InputStream imgInputStream = withDecodingNeeded.inputStream();
+
+        if (imgInputStream == null){
+            throw new IllegalStateException("image still in requesting: " + destination);
+        }
+
+
+        // @since 4.6.2 close input stream
+        try {
+            MediaDecoder mediaDecoder = mediaDecoders.get(withDecodingNeeded.contentType());
+
+            if (mediaDecoder == null) {
+                mediaDecoder = defaultMediaDecoder;
+            }
+
+            if (mediaDecoder != null) {
+                resDrawable = mediaDecoder.decode(withDecodingNeeded.contentType(), imgInputStream);
+                withDecodingNeeded.setCachedDrawable(resDrawable);
+            } else {
+                // throw that no media decoder is found
+                throw new IllegalStateException("No media-decoder is found: " + destination);
+            }
+        } finally {
+            try {
+                imgInputStream.close();
+            } catch (IOException e) {
+                Log.e("MARKWON-IMAGE", "Error closing inputStream", e);
+            }
+        }
+
+        return resDrawable;
     }
 }

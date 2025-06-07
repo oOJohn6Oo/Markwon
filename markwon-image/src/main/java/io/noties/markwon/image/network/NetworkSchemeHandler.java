@@ -11,6 +11,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import io.noties.markwon.image.ImageItem;
 import io.noties.markwon.image.SchemeHandler;
@@ -26,6 +30,10 @@ public class NetworkSchemeHandler extends SchemeHandler {
     public static final String SCHEME_HTTP = "http";
     public static final String SCHEME_HTTPS = "https";
 
+    private static final HashMap<String, ImageItem.WithDecodingNeeded> imgPathMap = new HashMap<>();
+
+    private static ExecutorService requestExecutor = Executors.newFixedThreadPool(12);
+
     @NonNull
     public static NetworkSchemeHandler create() {
         return new NetworkSchemeHandler();
@@ -39,8 +47,20 @@ public class NetworkSchemeHandler extends SchemeHandler {
     @NonNull
     @Override
     public ImageItem handle(@NonNull String raw, @NonNull Uri uri) {
+        ImageItem.WithDecodingNeeded previousItem = imgPathMap.get(raw);
+        if (previousItem != null) {
+            if (previousItem.isProcessing()) return previousItem;
+            if (previousItem.getCachedDrawable() != null) return previousItem;
+        } else {
+            previousItem = new ImageItem.WithDecodingNeeded();
+            imgPathMap.put(raw, previousItem);
+        }
+        requestExecutor.submit(() -> doRequestImage(raw));
+        return previousItem;
+    }
 
-        final ImageItem imageItem;
+    private static void doRequestImage(@NonNull String raw) {
+        final ImageItem.WithDecodingNeeded imageItem;
         try {
 
             final URL url = new URL(raw);
@@ -52,15 +72,15 @@ public class NetworkSchemeHandler extends SchemeHandler {
                 final String contentType = contentType(connection.getHeaderField("Content-Type"));
                 final InputStream inputStream = new BufferedInputStream(connection.getInputStream());
                 imageItem = ImageItem.withDecodingNeeded(contentType, inputStream);
+                imgPathMap.put(raw, imageItem);
             } else {
-                throw new IOException("Bad response code: " + responseCode + ", url: " + raw);
+//                throw new IOException("Bad response code: " + responseCode + ", url: " + raw);
             }
 
         } catch (IOException e) {
-            throw new IllegalStateException("Exception obtaining network resource: " + raw, e);
+            imgPathMap.remove(raw);
+//            throw new IllegalStateException("Exception obtaining network resource: " + raw, e);
         }
-
-        return imageItem;
     }
 
     @NonNull
