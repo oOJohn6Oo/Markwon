@@ -1,5 +1,20 @@
 ![logo](./art/markwon_logo.png)
 
+
+Compare to the original repo:
+
+- [x] Upgraded to the latest AGP version
+- [x] SSE demo
+- [x] fix latex blink issue
+- [x] Edge-to-Edge support for Demo APP
+- [x] Back press animation support
+- [ ] Fix Image blink issue(not blink now, but got a wrong image position)
+- [ ] Upgrade commonmark
+
+[DemoAPK](https://github.com/user-attachments/files/20646341/markwon-release.apk.md)
+
+---
+
 # Markwon
 
 [![Build](https://github.com/noties/Markwon/workflows/Build/badge.svg)](https://github.com/noties/Markwon/actions)
@@ -290,10 +305,6 @@ Asterisks (`*`)
 ___
 
 Underscores (`_`)
-
-## Latex
-
-$$f(x) = \frac{d}{dx}\left[ (3x^2 + 2x + 1)^5 \cdot \sin(2x + 1) \right] = 5(3x^2 + 2x + 1)^4 \cdot (6x + 2) \cdot \sin(2x + 1) + (3x^2 + 2x + 1)^5 \cdot 2 \cos(2x + 1)$$
 
 
 ## License

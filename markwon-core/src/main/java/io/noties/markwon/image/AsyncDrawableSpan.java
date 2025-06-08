@@ -64,13 +64,13 @@ public class AsyncDrawableSpan extends ReplacementSpan {
 
             final Rect rect = drawable.getBounds();
 
-            if (fm != null) {
-                fm.ascent = -rect.bottom;
-                fm.descent = 0;
-
-                fm.top = fm.ascent;
-                fm.bottom = 0;
-            }
+//            if (fm != null) {
+//                fm.ascent = -rect.bottom;
+//                fm.descent = 0;
+//
+//                fm.top = fm.ascent;
+//                fm.bottom = 0;
+//            }
 
             size = rect.right;
 

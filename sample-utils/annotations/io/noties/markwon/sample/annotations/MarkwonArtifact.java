@@ -21,7 +21,8 @@ public enum MarkwonArtifact {
     RECYCLER,
     RECYCLER_TABLE,
     SIMPLE_EXT,
-    SYNTAX_HIGHLIGHT;
+    SYNTAX_HIGHLIGHT,
+    SSE;
 
     @NonNull
     public String artifactName() {

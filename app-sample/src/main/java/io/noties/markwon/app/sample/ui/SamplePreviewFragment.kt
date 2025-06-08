@@ -11,6 +11,7 @@ import io.noties.markwon.app.sample.Sample
 class SamplePreviewFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        markwonSample.fragment = this
         return markwonSample.createView(inflater, container)
     }
 

@@ -2,14 +2,19 @@ package io.noties.markwon.image.network;
 
 import android.net.Uri;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 
 import io.noties.markwon.image.ImageItem;
+import io.noties.markwon.image.ImagesPlugin.OnImageRequestListener;
 import io.noties.markwon.image.SchemeHandler;
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -20,72 +25,122 @@ import okhttp3.ResponseBody;
  */
 public class OkHttpNetworkSchemeHandler extends SchemeHandler {
 
-    /**
-     * @see #create(OkHttpClient)
-     */
+    private final HashMap<String, ImageItem.WithDecodingNeeded> imgPathMap = new HashMap<>();
+
     @NonNull
     public static OkHttpNetworkSchemeHandler create() {
-        return create(new OkHttpClient());
+        return create(false, new OkHttpClient());
     }
 
     @NonNull
-    public static OkHttpNetworkSchemeHandler create(@NonNull OkHttpClient client) {
+    public static OkHttpNetworkSchemeHandler create(boolean asyncRequest, @NonNull OkHttpClient client) {
         // explicit cast, otherwise a recursive call
-        return create((Call.Factory) client);
+        return create(asyncRequest,(Call.Factory) client);
     }
 
     /**
      * @since 4.0.0
      */
     @NonNull
-    public static OkHttpNetworkSchemeHandler create(@NonNull Call.Factory factory) {
-        return new OkHttpNetworkSchemeHandler(factory);
+    public static OkHttpNetworkSchemeHandler create(boolean asyncRequest, @NonNull Call.Factory factory) {
+        return new OkHttpNetworkSchemeHandler(asyncRequest, factory);
     }
 
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
 
     // @since 4.0.0, previously just OkHttpClient
     private final Call.Factory factory;
+    private final boolean asyncRequest;
 
     @SuppressWarnings("WeakerAccess")
-    OkHttpNetworkSchemeHandler(@NonNull Call.Factory factory) {
+    OkHttpNetworkSchemeHandler(boolean asyncRequest, @NonNull Call.Factory factory) {
+        this.asyncRequest = asyncRequest;
         this.factory = factory;
     }
 
     @NonNull
     @Override
-    public ImageItem handle(@NonNull String raw, @NonNull Uri uri) {
+    public ImageItem handle(@NonNull String raw, @NonNull Uri uri,@Nullable OnImageRequestListener onImageRequestListener) {
+        if(asyncRequest){
+            return doAsyncRequest(raw, onImageRequestListener);
+        }else{
+            return doSyncRequest(raw);
+        }
+    }
+
+    private ImageItem.WithDecodingNeeded doAsyncRequest(String imgUrl,@Nullable OnImageRequestListener onImageRequestListener){
+        ImageItem.WithDecodingNeeded previousItem = imgPathMap.get(imgUrl);
+        if (previousItem != null) {
+            if (previousItem.isProcessing()) return previousItem;
+            if (previousItem.getCachedDrawable() != null) return previousItem;
+        } else {
+            previousItem = new ImageItem.WithDecodingNeeded();
+            imgPathMap.put(imgUrl, previousItem);
+        }
+
+        final ImageItem.WithDecodingNeeded tempItem = previousItem;
 
         final Request request = new Request.Builder()
-                .url(raw)
-                .tag(raw)
+                .url(imgUrl)
+                .tag(imgUrl)
+                .build();
+        factory.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                tempItem.setIsProcessing(false);
+                if (onImageRequestListener != null) {
+                    onImageRequestListener.onImageRequestFinished(imgUrl, false);
+                }
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                final ResponseBody body = response.body();
+                final InputStream inputStream = body != null
+                        ? body.byteStream()
+                        : null;
+
+                if(inputStream != null){
+                    // important to process content-type as it can have encoding specified (which we should remove)
+                    final String contentType =
+                            NetworkSchemeHandler.contentType(response.header(HEADER_CONTENT_TYPE));
+                    imgPathMap.put(imgUrl, ImageItem.withDecodingNeeded(contentType, inputStream));
+                }else{
+                    tempItem.setIsProcessing(false);
+                }
+                if (onImageRequestListener != null) {
+                    onImageRequestListener.onImageRequestFinished(imgUrl, tempItem.inputStream() != null);
+                }
+            }
+        });
+        return previousItem;
+    }
+
+    private ImageItem.WithDecodingNeeded doSyncRequest(String imgUrl){
+        final Request request = new Request.Builder()
+                .url(imgUrl)
+                .tag(imgUrl)
                 .build();
 
-        final Response response;
-        try {
-            response = factory.newCall(request).execute();
+        try(Response response = factory.newCall(request).execute()) {
+            final ResponseBody body = response.body();
+            final InputStream inputStream = body != null
+                    ? body.byteStream()
+                    : null;
+
+            if (inputStream == null) {
+                throw new IllegalStateException("Response does not contain body: " + imgUrl);
+            }
+
+            // important to process content-type as it can have encoding specified (which we should remove)
+            final String contentType =
+                    NetworkSchemeHandler.contentType(response.header(HEADER_CONTENT_TYPE));
+
+            return ImageItem.withDecodingNeeded(contentType, inputStream);
         } catch (Throwable t) {
-            throw new IllegalStateException("Exception obtaining network resource: " + raw, t);
+            throw new IllegalStateException("Exception obtaining network resource: " + imgUrl, t);
         }
 
-        if (response == null) {
-            throw new IllegalStateException("Could not obtain network response: " + raw);
-        }
-
-        final ResponseBody body = response.body();
-        final InputStream inputStream = body != null
-                ? body.byteStream()
-                : null;
-
-        if (inputStream == null) {
-            throw new IllegalStateException("Response does not contain body: " + raw);
-        }
-
-        // important to process content-type as it can have encoding specified (which we should remove)
-        final String contentType =
-                NetworkSchemeHandler.contentType(response.header(HEADER_CONTENT_TYPE));
-
-        return ImageItem.withDecodingNeeded(contentType, inputStream);
     }
 
     @NonNull

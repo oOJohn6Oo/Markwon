@@ -33,6 +33,9 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
     // @since 4.0.0 use a hash-map with a AsyncDrawable as key for multiple requests
     //  for the same destination
     private final Map<AsyncDrawable, Future<?>> requests = new HashMap<>(2);
+    @Nullable
+    private ImagesPlugin.OnImageRequestListener onImageRequestListener;
+
 
     AsyncDrawableLoaderImpl(@NonNull AsyncDrawableLoaderBuilder builder) {
         this(builder, new Handler(Looper.getMainLooper()));
@@ -48,6 +51,7 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
         this.placeholderProvider = builder.placeholderProvider;
         this.errorHandler = builder.errorHandler;
         this.handler = handler;
+        this.onImageRequestListener = builder.onImageRequestListener;
     }
 
     @Override
@@ -105,7 +109,7 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
                     }
 
                     // handle scheme
-                    final ImageItem imageItem = schemeHandler.handle(destination, uri);
+                    final ImageItem imageItem = schemeHandler.handle(destination, uri, onImageRequestListener);
 
                     // if resulting imageItem needs further decoding -> proceed
                     if (!imageItem.hasDecodingNeeded()) {
@@ -119,7 +123,7 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
                         drawable = errorHandler.handleError(destination, t);
                     } else {
                         // else simply log the error
-                        Log.e("MARKWON-IMAGE", "Error loading image: " + destination, t);
+//                        Log.e("MARKWON-IMAGE", "Error loading image: " + destination, t);
                     }
                 }
 

@@ -3,6 +3,7 @@ package io.noties.markwon.image;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Collection;
 
@@ -21,7 +22,7 @@ public abstract class SchemeHandler {
      * @see ImageItem#withDecodingNeeded(String, java.io.InputStream)
      */
     @NonNull
-    public abstract ImageItem handle(@NonNull String raw, @NonNull Uri uri);
+    public abstract ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener);
 
     /**
      * @since 4.0.0

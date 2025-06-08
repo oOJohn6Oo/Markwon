@@ -26,13 +26,17 @@ class AsyncDrawableLoaderBuilder {
 
     boolean isBuilt;
 
-    AsyncDrawableLoaderBuilder() {
+    @Nullable
+    ImagesPlugin.OnImageRequestListener onImageRequestListener;
+
+
+    AsyncDrawableLoaderBuilder(boolean asyncRequest) {
 
         // @since 4.0.0
         // okay, let's add supported schemes at the start, this would be : data-uri and default network
         // we should not use file-scheme as it's a bit complicated to assume file usage (lack of permissions)
         addSchemeHandler(DataUriSchemeHandler.create());
-        addSchemeHandler(NetworkSchemeHandler.create());
+        addSchemeHandler(NetworkSchemeHandler.create(asyncRequest));
 
         // add SVG and GIF, but only if they are present in the class-path
         if (SvgSupport.hasSvgSupport()) {
@@ -78,6 +82,10 @@ class AsyncDrawableLoaderBuilder {
     void removeMediaDecoder(@NonNull String contentType) {
         checkState();
         mediaDecoders.remove(contentType);
+    }
+
+    void setOnImageRequestListener(@Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener) {
+        this.onImageRequestListener = onImageRequestListener;
     }
 
     /**

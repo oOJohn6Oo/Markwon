@@ -174,5 +174,10 @@ public abstract class ImageItem {
         public boolean isProcessing() {
             return isProcessing;
         }
+
+        public void setIsProcessing(boolean processing) {
+            isProcessing = processing;
+        }
+
     }
 }

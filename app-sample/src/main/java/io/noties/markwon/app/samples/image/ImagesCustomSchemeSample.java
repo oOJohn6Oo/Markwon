@@ -3,6 +3,7 @@ package io.noties.markwon.app.samples.image;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,10 +49,10 @@ public class ImagesCustomSchemeSample extends MarkwonTextViewSample {
 
             @NonNull
             @Override
-            public ImageItem handle(@NonNull String raw, @NonNull Uri uri) {
+            public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener) {
               // just replace it with https for the sack of sample
               final String url = raw.replace("myownscheme", "https");
-              return handler.handle(url, Uri.parse(url));
+              return handler.handle(url, Uri.parse(url), onImageRequestListener);
             }
 
             @NonNull
