@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="64dp">
+
+        <TextView
+            android:id="@+id/text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="\(sdfjlsdjfl\)\[" />
+    </ScrollView>
+
+    <ViewSwitcher
+        android:id="@+id/switcher_fg_sse"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom">
+
+        <LinearLayout
+            android:id="@+id/seek_container_fg_sse"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="#66000000"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/title_speed_fg_sse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                tools:text="Speed: 12" />
+            <!--        min 0 max: 99 mapTo [1,100]-->
+            <SeekBar
+                android:id="@+id/seek_bar_fg_sse"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="12dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:max="99"
+                android:progressBackgroundTint="@color/white" />
+
+            <ImageButton
+                android:id="@+id/btn_collapse_fg_sse"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@null"
+                android:contentDescription="Collapse"
+                android:rotation="180"
+                android:src="@drawable/ic_arrow_back_white_24dp"
+                android:tint="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/speed_btn_container_fg_sse"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/btn_expand_fg_sse"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/bg_search_bar"
+                android:backgroundTint="@color/accent"
+                android:textColor="@color/white"
+                tools:text="20" />
+        </LinearLayout>
+    </ViewSwitcher>
+</FrameLayout>

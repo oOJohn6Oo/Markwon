@@ -3,7 +3,6 @@ package io.noties.markwon.app.sample.ui
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
@@ -13,14 +12,15 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.core.os.BundleCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.isNotEmpty
 import androidx.core.view.updatePaddingRelative
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.noties.adapt.Adapt
 import io.noties.adapt.Item
 import io.noties.adapt.recyclerview.AdaptRecyclerView
 import io.noties.adapt.recyclerview.DiffUtilDataSetChangedHandler
@@ -31,6 +31,7 @@ import io.noties.markwon.app.BuildConfig
 import io.noties.markwon.app.R
 import io.noties.markwon.app.databinding.FragmentSampleListBinding
 import io.noties.markwon.app.readme.ReadMeActivity
+import io.noties.markwon.app.sample.MainActivity
 import io.noties.markwon.app.sample.Sample
 import io.noties.markwon.app.sample.SampleManager
 import io.noties.markwon.app.sample.SampleSearch
@@ -45,14 +46,11 @@ import io.noties.markwon.app.utils.onPreDraw
 import io.noties.markwon.app.utils.safeDrawing
 import io.noties.markwon.app.utils.stackTraceString
 import io.noties.markwon.app.utils.tagDisplayName
+import io.noties.markwon.app.utils.vdp
 import io.noties.markwon.app.widget.SearchBar
 import io.noties.markwon.movement.MovementMethodPlugin
 import io.noties.markwon.sample.annotations.MarkwonArtifact
 import kotlinx.parcelize.Parcelize
-import androidx.core.net.toUri
-import io.noties.markwon.app.sample.MainActivity
-import io.noties.markwon.app.utils.vdp
-import androidx.core.view.isNotEmpty
 
 class SampleListFragment : Fragment() {
 
@@ -229,11 +227,7 @@ class SampleListFragment : Fragment() {
 
         if (isInitialScreen) {
             appBarIconReadme.setOnClickListener {
-                requireActivity().startActivity(ReadMeActivity.makeIntent(it.context, false))
-            }
-            appBarIconReadme.setOnLongClickListener {
-                requireActivity().startActivity(ReadMeActivity.makeIntent(it.context, true))
-                true
+                requireActivity().startActivity(ReadMeActivity.makeIntent(it.context))
             }
         } else {
             appBarIcon.setImageResource(R.drawable.ic_arrow_back_white_24dp)

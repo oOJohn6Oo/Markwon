@@ -1,6 +1,7 @@
 package io.noties.markwon.image.network;
 
 import android.net.Uri;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -14,9 +15,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import io.noties.markwon.image.ImageItem;
+import io.noties.markwon.image.ImageItem.WithDecodingNeeded;
+import io.noties.markwon.image.ImagesPlugin.OnImageRequestListener;
 import io.noties.markwon.image.SchemeHandler;
 
 /**
@@ -30,40 +32,41 @@ public class NetworkSchemeHandler extends SchemeHandler {
     public static final String SCHEME_HTTP = "http";
     public static final String SCHEME_HTTPS = "https";
 
-    private static final HashMap<String, ImageItem.WithDecodingNeeded> imgPathMap = new HashMap<>();
+    private final boolean asyncRequest;
 
-    private static ExecutorService requestExecutor = Executors.newFixedThreadPool(12);
+    private final HashMap<String, WithDecodingNeeded> cachedImageItems = new HashMap<>();
+
+    private final ExecutorService requestExecutor = Executors.newFixedThreadPool(12);
 
     @NonNull
     public static NetworkSchemeHandler create() {
-        return new NetworkSchemeHandler();
+        return new NetworkSchemeHandler(false);
     }
 
-    @SuppressWarnings("WeakerAccess")
-    NetworkSchemeHandler() {
+    @NonNull
+    public static NetworkSchemeHandler create(boolean asyncRequest) {
+        return new NetworkSchemeHandler(asyncRequest);
+    }
 
+    NetworkSchemeHandler(boolean asyncRequest) {
+        this.asyncRequest = asyncRequest;
     }
 
     @NonNull
     @Override
-    public ImageItem handle(@NonNull String raw, @NonNull Uri uri) {
-        ImageItem.WithDecodingNeeded previousItem = imgPathMap.get(raw);
-        if (previousItem != null) {
-            if (previousItem.isProcessing()) return previousItem;
-            if (previousItem.getCachedDrawable() != null) return previousItem;
-        } else {
-            previousItem = new ImageItem.WithDecodingNeeded();
-            imgPathMap.put(raw, previousItem);
+    public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable OnImageRequestListener onImageRequestListener) {
+        if (asyncRequest) {
+            return onAsyncRequestImage(raw, onImageRequestListener);
         }
-        requestExecutor.submit(() -> doRequestImage(raw));
-        return previousItem;
+        return onSyncRequestImage(raw);
     }
 
-    private static void doRequestImage(@NonNull String raw) {
-        final ImageItem.WithDecodingNeeded imageItem;
-        try {
 
-            final URL url = new URL(raw);
+    private WithDecodingNeeded onSyncRequestImage(@NonNull String imgUrl){
+
+        final WithDecodingNeeded imageItem;
+        try {
+            final URL url = new URL(imgUrl);
             final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.connect();
 
@@ -72,14 +75,56 @@ public class NetworkSchemeHandler extends SchemeHandler {
                 final String contentType = contentType(connection.getHeaderField("Content-Type"));
                 final InputStream inputStream = new BufferedInputStream(connection.getInputStream());
                 imageItem = ImageItem.withDecodingNeeded(contentType, inputStream);
-                imgPathMap.put(raw, imageItem);
             } else {
-//                throw new IOException("Bad response code: " + responseCode + ", url: " + raw);
+                throw new IOException("Bad response code: " + responseCode + ", url: " + imgUrl);
             }
 
         } catch (IOException e) {
-            imgPathMap.remove(raw);
-//            throw new IllegalStateException("Exception obtaining network resource: " + raw, e);
+            throw new IllegalStateException("Exception obtaining network resource: " + imgUrl, e);
+        }
+
+        return imageItem;
+    }
+
+    private WithDecodingNeeded onAsyncRequestImage(@NonNull String imgUrl, @Nullable OnImageRequestListener onImageRequestListener){
+        WithDecodingNeeded previousItem = cachedImageItems.get(imgUrl);
+        if (previousItem != null) {
+            if (previousItem.isProcessing()) return previousItem;
+            if (previousItem.getCachedDrawable() != null) return previousItem;
+        } else {
+            previousItem = new WithDecodingNeeded();
+            cachedImageItems.put(imgUrl, previousItem);
+        }
+        final WithDecodingNeeded tempItem = previousItem;
+        requestExecutor.submit(() -> doAsyncRequest(imgUrl, tempItem, onImageRequestListener));
+        return previousItem;
+    }
+
+    private void doAsyncRequest(@NonNull String imgUrl, WithDecodingNeeded imageItem,@Nullable OnImageRequestListener onImageRequestListener) {
+        boolean result = false;
+        try {
+            final URL url = new URL(imgUrl);
+            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
+
+            final int responseCode = connection.getResponseCode();
+            if (responseCode >= 200 && responseCode < 300) {
+                final String contentType = contentType(connection.getHeaderField("Content-Type"));
+                final InputStream inputStream = new BufferedInputStream(connection.getInputStream());
+                cachedImageItems.put(imgUrl, ImageItem.withDecodingNeeded(contentType, inputStream));
+                result = true;
+            } else {
+                imageItem.setIsProcessing(false);
+//                throw new IOException("Bad response code: " + responseCode + ", url: " + imgUrl);
+            }
+
+        } catch (Exception e) {
+            imageItem.setIsProcessing(false);
+//            throw new IllegalStateException("Exception obtaining network resource: " + imgUrl, e);
+        } finally {
+            if (onImageRequestListener != null){
+                onImageRequestListener.onImageRequestFinished(imgUrl, result);
+            }
         }
     }
 

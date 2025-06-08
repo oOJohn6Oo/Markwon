@@ -3,15 +3,11 @@ package io.noties.markwon.image;
 import android.graphics.drawable.Drawable;
 import android.text.Spanned;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-
 import org.commonmark.node.Image;
-
 import java.util.concurrent.ExecutorService;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.MarkwonPlugin;
@@ -27,47 +23,24 @@ import io.noties.markwon.image.svg.SvgMediaDecoder;
 public class ImagesPlugin extends AbstractMarkwonPlugin {
 
     /**
-     * @since 4.0.0
-     */
-    public interface ImagesConfigure {
-        void configureImages(@NonNull ImagesPlugin plugin);
-    }
-
-    /**
-     * @since 4.0.0
-     */
-    public interface PlaceholderProvider {
-        @Nullable
-        Drawable providePlaceholder(@NonNull AsyncDrawable drawable);
-    }
-
-    /**
-     * @since 4.0.0
-     */
-    public interface ErrorHandler {
-
-        /**
-         * Can optionally return a Drawable that will be displayed in case of an error
-         */
-        @Nullable
-        Drawable handleError(@NonNull String url, @NonNull Throwable throwable);
-    }
-
-    /**
      * Factory method to create an empty {@link ImagesPlugin} instance with no {@link SchemeHandler}s
      * nor {@link MediaDecoder}s registered. Can be used to further configure via instance methods or
      * via {@link MarkwonPlugin#configure(Registry)}
      *
-     * @see #create(ImagesConfigure)
      */
     @NonNull
     public static ImagesPlugin create() {
-        return new ImagesPlugin();
+        return new ImagesPlugin(false);
+    }
+
+    @NonNull
+    public static ImagesPlugin create(boolean asyncRequest) {
+        return new ImagesPlugin(asyncRequest);
     }
 
     @NonNull
     public static ImagesPlugin create(@NonNull ImagesConfigure configure) {
-        final ImagesPlugin plugin = new ImagesPlugin();
+        final ImagesPlugin plugin = new ImagesPlugin(false);
         configure.configureImages(plugin);
         return plugin;
     }
@@ -75,8 +48,8 @@ public class ImagesPlugin extends AbstractMarkwonPlugin {
     private final AsyncDrawableLoaderBuilder builder;
 
     // @since 4.0.0
-    ImagesPlugin() {
-        this(new AsyncDrawableLoaderBuilder());
+    ImagesPlugin(boolean asyncRequest) {
+        this(new AsyncDrawableLoaderBuilder(asyncRequest));
     }
 
     // @since 4.0.0
@@ -153,6 +126,10 @@ public class ImagesPlugin extends AbstractMarkwonPlugin {
         return this;
     }
 
+    public void setOnImageRequestListener(@Nullable OnImageRequestListener onImageRequestListener) {
+        builder.setOnImageRequestListener(onImageRequestListener);
+    }
+
     /**
      * @since 4.0.0
      */
@@ -191,4 +168,36 @@ public class ImagesPlugin extends AbstractMarkwonPlugin {
     public void afterSetText(@NonNull TextView textView) {
         AsyncDrawableScheduler.schedule(textView);
     }
+
+    /**
+     * @since 4.0.0
+     */
+    public interface ImagesConfigure {
+        void configureImages(@NonNull ImagesPlugin plugin);
+    }
+
+    /**
+     * @since 4.0.0
+     */
+    public interface PlaceholderProvider {
+        @Nullable
+        Drawable providePlaceholder(@NonNull AsyncDrawable drawable);
+    }
+
+    /**
+     * @since 4.0.0
+     */
+    public interface ErrorHandler {
+
+        /**
+         * Can optionally return a Drawable that will be displayed in case of an error
+         */
+        @Nullable
+        Drawable handleError(@NonNull String url, @NonNull Throwable throwable);
+    }
+
+    public interface OnImageRequestListener {
+        void onImageRequestFinished(String imgUrl, boolean success);
+    }
+
 }

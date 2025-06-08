@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -20,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.noties.markwon.image.ImageItem;
+import io.noties.markwon.image.ImagesPlugin;
 import io.noties.markwon.image.SchemeHandler;
 
 /**
@@ -64,11 +64,9 @@ public class FileSchemeHandler extends SchemeHandler {
 
     @NonNull
     @Override
-    public ImageItem handle(@NonNull String raw, @NonNull Uri uri) {
-
+    public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener) {
         final List<String> segments = uri.getPathSegments();
-        if (segments == null
-                || segments.size() == 0) {
+        if (segments == null || segments.isEmpty()) {
             // pointing to file & having no path segments is no use
             throw new IllegalStateException("Invalid file path: " + raw);
         }
@@ -113,7 +111,7 @@ public class FileSchemeHandler extends SchemeHandler {
             }
 
             try {
-                inputStream = new BufferedInputStream(new FileInputStream(new File(path)));
+                inputStream = new BufferedInputStream(new FileInputStream(path));
             } catch (FileNotFoundException e) {
                 throw new IllegalStateException("Exception reading file: " + raw, e);
             }

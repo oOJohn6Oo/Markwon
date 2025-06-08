@@ -143,14 +143,14 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
     @VisibleForTesting
     final Config config;
 
-    private final JLatextAsyncDrawableLoader jLatextAsyncDrawableLoader;
+    private final JLatexAsyncDrawableLoader jLatexAsyncDrawableLoader;
     private final JLatexBlockImageSizeResolver jLatexBlockImageSizeResolver;
     private final ImageSizeResolver inlineImageSizeResolver;
 
     @SuppressWarnings("WeakerAccess")
     JLatexMathPlugin(@NonNull Config config) {
         this.config = config;
-        this.jLatextAsyncDrawableLoader = new JLatextAsyncDrawableLoader(config);
+        this.jLatexAsyncDrawableLoader = new JLatexAsyncDrawableLoader(config);
         this.jLatexBlockImageSizeResolver = new JLatexBlockImageSizeResolver(config.theme.blockFitCanvas());
         this.inlineImageSizeResolver = new InlineImageSizeResolver();
     }
@@ -208,7 +208,7 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
                         configuration.theme(),
                         new JLatextAsyncDrawable(
                                 latex,
-                                jLatextAsyncDrawableLoader,
+                                jLatexAsyncDrawableLoader,
                                 jLatexBlockImageSizeResolver,
                                 null,
                                 true),
@@ -246,7 +246,7 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
                         configuration.theme(),
                         new JLatextAsyncDrawable(
                                 latex,
-                                jLatextAsyncDrawableLoader,
+                                jLatexAsyncDrawableLoader,
                                 inlineImageSizeResolver,
                                 null,
                                 false),
@@ -354,13 +354,13 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
     }
 
     // @since 4.0.0
-    static class JLatextAsyncDrawableLoader extends AsyncDrawableLoader {
-
+    static class JLatexAsyncDrawableLoader extends AsyncDrawableLoader {
+        public Map<String, JLatexMathDrawable> cachedLatexMap = new HashMap<>();
         private final Config config;
         private final Handler handler = new Handler(Looper.getMainLooper());
         private final Map<AsyncDrawable, Future<?>> cache = new HashMap<>(3);
 
-        JLatextAsyncDrawableLoader(@NonNull Config config) {
+        JLatexAsyncDrawableLoader(@NonNull Config config) {
             this.config = config;
         }
 
@@ -372,6 +372,13 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
             // check for currently running tasks associated with provided drawable
             final Future<?> future = cache.get(drawable);
 
+            if (cachedLatexMap.containsKey(drawable.getDestination())) {
+                JLatexMathDrawable mathDrawable = cachedLatexMap.get(drawable.getDestination());
+                if (mathDrawable != null) {
+                    drawable.setResult(mathDrawable);
+                    return;
+                }
+            }
             // if it's present -> proceed with new execution
             // as asyncDrawable is immutable, it won't have destination changed (so there is no need
             // to cancel any started tasks)
@@ -418,6 +425,7 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
                             jLatexMathDrawable = createInlineDrawable(jLatextAsyncDrawable);
                         }
 
+                        cachedLatexMap.put(jLatextAsyncDrawable.getDestination(), jLatexMathDrawable);
                         setResult(drawable, jLatexMathDrawable);
                     }
                 }));

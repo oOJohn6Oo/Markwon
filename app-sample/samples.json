@@ -1,5 +1,29 @@
 [
   {
+    "javaClassName": "io.noties.markwon.app.samples.sse.SseReadMeSample",
+    "id": "20250609030069",
+    "title": "SSE README",
+    "description": "Display README in SSE style",
+    "artifacts": [
+      "SSE"
+    ],
+    "tags": [
+      "rendering"
+    ]
+  },
+  {
+    "javaClassName": "io.noties.markwon.app.samples.sse.SseLatexSample",
+    "id": "20250609030068",
+    "title": "SSE Latex",
+    "description": "Display Latex + Markdown in SSE style",
+    "artifacts": [
+      "SSE"
+    ],
+    "tags": [
+      "rendering"
+    ]
+  },
+  {
     "javaClassName": "io.noties.markwon.app.samples.CopyCodeBlockSample",
     "id": "20210315112847",
     "title": "Copy code block",

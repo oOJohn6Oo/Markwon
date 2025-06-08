@@ -2,12 +2,14 @@ package io.noties.markwon.image.data;
 
 import android.net.Uri;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
 import java.util.Collections;
 
 import io.noties.markwon.image.ImageItem;
+import io.noties.markwon.image.ImagesPlugin;
 import io.noties.markwon.image.SchemeHandler;
 
 /**
@@ -35,7 +37,7 @@ public class DataUriSchemeHandler extends SchemeHandler {
 
     @NonNull
     @Override
-    public ImageItem handle(@NonNull String raw, @NonNull Uri uri) {
+    public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener) {
 
         if (!raw.startsWith(START)) {
             throw new IllegalStateException("Invalid data-uri: " + raw);

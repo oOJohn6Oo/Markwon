@@ -50,3 +50,8 @@ fun loadReadMe(context: Context): String {
     val stream = context.assets.open("README.md")
     return stream.readStringAndClose()
 }
+
+fun loadSseLatex(context: Context): String {
+    val stream = context.assets.open("sse-latex.md")
+    return stream.readStringAndClose()
+}
