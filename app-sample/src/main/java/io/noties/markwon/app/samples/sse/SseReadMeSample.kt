@@ -1,6 +1,11 @@
 package io.noties.markwon.app.samples.sse
 
+import android.annotation.SuppressLint
 import android.view.View
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.TranslateAnimation
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.core.view.ViewCompat
@@ -43,6 +48,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.commonmark.node.FencedCodeBlock
 
+@Suppress("unused")
 @MarkwonSampleInfo(
     id = "20250609030069",
     title = "SSE README",
@@ -57,6 +63,8 @@ class SseReadMeSample : MarkwonTextViewSample() {
 
     private var isSseFinished = false
     private var fullLatexStr: String = ""
+    private var enableAutoScroll = true
+
     /**
      * Character / 100 Millis
      */
@@ -78,6 +86,36 @@ class SseReadMeSample : MarkwonTextViewSample() {
         initMarkwon(view)
         setupEdge2Edge()
         loadSSEData()
+
+        setupSpeedAndSeeker()
+    }
+
+    private fun setupSpeedAndSeeker() {
+        mBinding.switcherFgSse.displayedChild = 0
+        mBinding.btnCollapseFgSse.setOnClickListener {
+            mBinding.switcherFgSse.apply {
+                inAnimation = slideInFromLeft()
+                outAnimation = slideOutToRight()
+                displayedChild = 0
+            }
+            mBinding.switcherFgSse.displayedChild = 1
+        }
+        mBinding.btnExpandFgSse.setOnClickListener{
+            mBinding.switcherFgSse.apply {
+                inAnimation = slideInFromRight()
+                outAnimation = slideOutToLeft()
+                displayedChild = 0
+            }
+        }
+        mBinding.seekBarFgSse.setOnSeekBarChangeListener(object : OnSeekBarChangeListener by noOpDelegate() {
+            override fun onProgressChanged(seekbar: SeekBar, progress: Int, p2: Boolean) {
+                val desireProgress = progress + 1
+                currentSpeed = desireProgress
+                mBinding.titleSpeedFgSse.text = "Speed: $desireProgress"
+                mBinding.btnExpandFgSse.text = desireProgress.toString()
+            }
+        })
+        mBinding.seekBarFgSse.progress = currentSpeed - 1
     }
 
     private fun initMarkwon(view: View) {
@@ -140,16 +178,12 @@ class SseReadMeSample : MarkwonTextViewSample() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun loadSSEData() {
-
-        mBinding.seekBarFgSse.setOnSeekBarChangeListener(object : OnSeekBarChangeListener by noOpDelegate() {
-            override fun onProgressChanged(seekbar: SeekBar, progress: Int, p2: Boolean) {
-                val desireProgress = progress + 1
-                currentSpeed = desireProgress
-                mBinding.titleSpeedFgSse.text = "Speed: $desireProgress"
-            }
-        })
-        mBinding.seekBarFgSse.progress = currentSpeed - 1
+        mBinding.scrollView.setOnTouchListener { _, _ ->
+            enableAutoScroll = false
+            false
+        }
 
         fragment.lifecycleScope.launch(Dispatchers.Main) {
             fullLatexStr = loadReadMe(fragment.requireContext())
@@ -169,6 +203,9 @@ class SseReadMeSample : MarkwonTextViewSample() {
                 .catch { }
                 .collect {
                     markwon.setParsedMarkdown(mBinding.textView, it)
+                    if (enableAutoScroll) {
+                        mBinding.scrollView.fullScroll(View.FOCUS_DOWN)
+                    }
                 }
         }
     }
@@ -180,6 +217,70 @@ class SseReadMeSample : MarkwonTextViewSample() {
                 markwon.render(markwon.parse(fullLatexStr))
             }
             markwon.setParsedMarkdown(textView, node)
+        }
+    }
+
+    private fun slideInFromLeft(): Animation {
+        val slide = TranslateAnimation(
+            Animation.RELATIVE_TO_PARENT, -0.5f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f
+        )
+        val fade = AlphaAnimation(0f, 1f)
+
+        return AnimationSet(true).apply {
+            addAnimation(slide)
+            addAnimation(fade)
+            duration = 200
+        }
+    }
+
+    private fun slideInFromRight(): Animation {
+        val slide = TranslateAnimation(
+            Animation.RELATIVE_TO_PARENT, 0.5f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f
+        )
+        val fade = AlphaAnimation(0f, 1f)
+
+        return AnimationSet(true).apply {
+            addAnimation(slide)
+            addAnimation(fade)
+            duration = 200
+        }
+    }
+
+    private fun slideOutToLeft(): Animation {
+        val slide = TranslateAnimation(
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, -0.5f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f
+        )
+        val fade = AlphaAnimation(1f, 0f)
+
+        return AnimationSet(true).apply {
+            addAnimation(slide)
+            addAnimation(fade)
+            duration = 200
+        }
+    }
+
+    private fun slideOutToRight(): Animation {
+        val slide = TranslateAnimation(
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0.5f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f
+        )
+        val fade = AlphaAnimation(1f, 0f)
+
+        return AnimationSet(true).apply {
+            addAnimation(slide)
+            addAnimation(fade)
+            duration = 200
         }
     }
 

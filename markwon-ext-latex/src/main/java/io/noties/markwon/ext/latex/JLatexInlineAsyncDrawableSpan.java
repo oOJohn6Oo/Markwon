@@ -2,11 +2,14 @@ package io.noties.markwon.ext.latex;
 
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.nio.channels.AsynchronousChannel;
 
 import io.noties.markwon.core.MarkwonTheme;
 import io.noties.markwon.image.AsyncDrawable;
@@ -36,19 +39,13 @@ class JLatexInlineAsyncDrawableSpan extends JLatexAsyncDrawableSpan {
         final int size;
 
         if (drawable.hasResult()) {
-
             final Rect rect = drawable.getBounds();
-
-//            if (fm != null) {
-//                final int half = rect.bottom / 2;
-//                fm.ascent = -half;
-//                fm.descent = half;
-//
-//                fm.top = fm.ascent;
-//                fm.bottom = 0;
-//            }
-
             size = rect.right;
+
+            if (fm != null) {
+                adjustFontMetrics(rect, fm);
+            }
+
 
         } else {
 
@@ -57,5 +54,22 @@ class JLatexInlineAsyncDrawableSpan extends JLatexAsyncDrawableSpan {
         }
 
         return size;
+    }
+
+    private void adjustFontMetrics(@NonNull Rect spanRect, @NonNull Paint.FontMetricsInt fm) {
+        int lineHeight = fm.bottom - fm.top;
+        int spanHeight = spanRect.height();
+
+        if (lineHeight >= spanHeight) return;
+
+        int safeAreaBottom = fm.bottom - fm.descent;
+        int safeAreaTop = fm.top - fm.ascent;
+
+        final int half = (spanHeight - lineHeight) / 2;
+        fm.ascent -= half;
+        fm.descent += half;
+
+        fm.top = fm.ascent + safeAreaTop;
+        fm.bottom = fm.descent + safeAreaBottom;
     }
 }

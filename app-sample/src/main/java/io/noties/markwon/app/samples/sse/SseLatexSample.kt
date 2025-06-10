@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.commonmark.node.FencedCodeBlock
 
+@Suppress("unused")
 @MarkwonSampleInfo(
     id = "20250609030068",
     title = "SSE Latex",
@@ -218,68 +219,68 @@ class SseLatexSample : MarkwonTextViewSample() {
             markwon.setParsedMarkdown(textView, node)
         }
     }
-}
 
-fun slideInFromLeft(): Animation {
-    val slide = TranslateAnimation(
-        Animation.RELATIVE_TO_PARENT, -0.5f,
-        Animation.RELATIVE_TO_PARENT, 0f,
-        Animation.RELATIVE_TO_PARENT, 0f,
-        Animation.RELATIVE_TO_PARENT, 0f
-    )
-    val fade = AlphaAnimation(0f, 1f)
+    private fun slideInFromLeft(): Animation {
+        val slide = TranslateAnimation(
+            Animation.RELATIVE_TO_PARENT, -0.5f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f
+        )
+        val fade = AlphaAnimation(0f, 1f)
 
-    return AnimationSet(true).apply {
-        addAnimation(slide)
-        addAnimation(fade)
-        duration = 200
+        return AnimationSet(true).apply {
+            addAnimation(slide)
+            addAnimation(fade)
+            duration = 200
+        }
     }
-}
 
-fun slideInFromRight(): Animation {
-    val slide = TranslateAnimation(
-        Animation.RELATIVE_TO_PARENT, 0.5f,
-        Animation.RELATIVE_TO_PARENT, 0f,
-        Animation.RELATIVE_TO_PARENT, 0f,
-        Animation.RELATIVE_TO_PARENT, 0f
-    )
-    val fade = AlphaAnimation(0f, 1f)
+    private fun slideInFromRight(): Animation {
+        val slide = TranslateAnimation(
+            Animation.RELATIVE_TO_PARENT, 0.5f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f
+        )
+        val fade = AlphaAnimation(0f, 1f)
 
-    return AnimationSet(true).apply {
-        addAnimation(slide)
-        addAnimation(fade)
-        duration = 200
+        return AnimationSet(true).apply {
+            addAnimation(slide)
+            addAnimation(fade)
+            duration = 200
+        }
     }
-}
 
-fun slideOutToLeft(): Animation {
-    val slide = TranslateAnimation(
-        Animation.RELATIVE_TO_PARENT, 0f,
-        Animation.RELATIVE_TO_PARENT, -0.5f,
-        Animation.RELATIVE_TO_PARENT, 0f,
-        Animation.RELATIVE_TO_PARENT, 0f
-    )
-    val fade = AlphaAnimation(1f, 0f)
+    private fun slideOutToLeft(): Animation {
+        val slide = TranslateAnimation(
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, -0.5f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f
+        )
+        val fade = AlphaAnimation(1f, 0f)
 
-    return AnimationSet(true).apply {
-        addAnimation(slide)
-        addAnimation(fade)
-        duration = 200
+        return AnimationSet(true).apply {
+            addAnimation(slide)
+            addAnimation(fade)
+            duration = 200
+        }
     }
-}
 
-fun slideOutToRight(): Animation {
-    val slide = TranslateAnimation(
-        Animation.RELATIVE_TO_PARENT, 0f,
-        Animation.RELATIVE_TO_PARENT, 0.5f,
-        Animation.RELATIVE_TO_PARENT, 0f,
-        Animation.RELATIVE_TO_PARENT, 0f
-    )
-    val fade = AlphaAnimation(1f, 0f)
+    private fun slideOutToRight(): Animation {
+        val slide = TranslateAnimation(
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0.5f,
+            Animation.RELATIVE_TO_PARENT, 0f,
+            Animation.RELATIVE_TO_PARENT, 0f
+        )
+        val fade = AlphaAnimation(1f, 0f)
 
-    return AnimationSet(true).apply {
-        addAnimation(slide)
-        addAnimation(fade)
-        duration = 200
+        return AnimationSet(true).apply {
+            addAnimation(slide)
+            addAnimation(fade)
+            duration = 200
+        }
     }
 }
