@@ -8,10 +8,10 @@ Compare to the original repo:
 - [x] fix latex blink issue
 - [x] Edge-to-Edge support for Demo APP
 - [x] Back press animation support
-- [ ] Fix Image blink issue(not blink now, but got a wrong image position)
+- [x] Fix Image blink issue
 - [ ] Upgrade commonmark
 
-[DemoAPK](https://github.com/user-attachments/files/20646341/markwon-release.apk.md)
+[DemoAPK](https://github.com/user-attachments/files/20670738/markwon-release.apk.md)
 
 ---
 
