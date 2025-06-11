@@ -14,19 +14,27 @@ import io.noties.markwon.image.ImageSizeResolver;
 class JLatextAsyncDrawable extends AsyncDrawable {
 
     private final boolean isBlock;
+    private final boolean isComplete;
 
     JLatextAsyncDrawable(
             @NonNull String destination,
             @NonNull AsyncDrawableLoader loader,
             @NonNull ImageSizeResolver imageSizeResolver,
             @Nullable ImageSize imageSize,
-            boolean isBlock
+            boolean isBlock,
+            boolean isComplete
     ) {
         super(destination, loader, imageSizeResolver, imageSize);
         this.isBlock = isBlock;
+        this.isComplete = isComplete;
     }
 
     public boolean isBlock() {
         return isBlock;
+    }
+
+
+    public boolean isComplete() {
+        return isComplete;
     }
 }

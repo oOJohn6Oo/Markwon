@@ -210,7 +210,7 @@ public class JLatexMathPluginTest {
                     ArgumentCaptor.forClass(BlockParserFactory.class);
             verify(builder, times(1)).customBlockParserFactory(captor.capture());
             final BlockParserFactory factory = captor.getValue();
-            assertTrue(factory.getClass().getName(), factory instanceof JLatexMathBlockParser.Factory);
+            assertTrue(factory.getClass().getName(), factory instanceof JLatexBlockParserFactory);
         }
 
         // visitor

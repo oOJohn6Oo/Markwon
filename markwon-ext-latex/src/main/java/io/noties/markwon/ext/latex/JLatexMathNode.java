@@ -7,13 +7,14 @@ import org.commonmark.node.CustomNode;
  */
 public class JLatexMathNode extends CustomNode {
 
-    private String latex;
+    private final String latex;
+
+    public JLatexMathNode(String latex) {
+        this.latex = latex;
+    }
 
     public String latex() {
         return latex;
     }
 
-    public void latex(String latex) {
-        this.latex = latex;
-    }
 }

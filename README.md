@@ -3,13 +3,12 @@
 
 Compare to the original repo:
 
+- [ ] Upgrade commonmark
 - [x] Upgraded to the latest AGP version
 - [x] SSE demo
-- [x] fix latex blink issue
+- [x] fix Latex and Image blink issue
 - [x] Edge-to-Edge support for Demo APP
 - [x] Back press animation support
-- [x] Fix Image blink issue
-- [ ] Upgrade commonmark
 
 [DemoAPK](https://github.com/user-attachments/files/20670738/markwon-release.apk.md)
 

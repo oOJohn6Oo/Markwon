@@ -13,24 +13,55 @@ import io.noties.markwon.inlineparser.InlineProcessor;
  */
 class JLatexMathInlineProcessor extends InlineProcessor {
 
-    private static final Pattern RE = Pattern.compile("(\\${2})([\\s\\S]+?)\\1");
+    @LatexParseStyle
+    private final int parseStyle;
+
+    public JLatexMathInlineProcessor(@LatexParseStyle int parseStyle) {
+        this.parseStyle = parseStyle;
+    }
+
+    private static final Pattern RE4Style2Dollar = Pattern.compile("(\\${2})([\\s\\S]+?)\\1");
+    private static final Pattern RE4StyleSlashDollar = Pattern.compile("\\\\\\$([\\s\\S]+?)\\\\\\$");
+    private static final Pattern RE4StyleSlashSBracket = Pattern.compile("\\\\\\(([\\s\\S]+?)\\\\\\)");
 
     @Override
     public char specialCharacter() {
-        return '$';
+        return mapStyle2SpecialChar();
     }
 
     @Nullable
     @Override
     protected Node parse() {
 
-        final String latex = match(RE);
+        final String latex = match(mapStyle2Pattern());
         if (latex == null) {
             return null;
         }
 
-        final JLatexMathNode node = new JLatexMathNode();
-        node.latex(latex.substring(2, latex.length() - 2));
-        return node;
+        return new JLatexMathNode(latex.substring(2, latex.length() - 2));
+    }
+
+    private Pattern mapStyle2Pattern(){
+        switch (parseStyle){
+            case LatexParseStyle.STYLE_2_DOLLAR:
+                return RE4Style2Dollar;
+
+            case LatexParseStyle.STYLE_SLASH_DOLLAR:
+                return RE4StyleSlashDollar;
+
+            default:
+                return RE4StyleSlashSBracket;
+        }
+    }
+
+    private char mapStyle2SpecialChar(){
+        switch (parseStyle){
+            case LatexParseStyle.STYLE_SLASH_DOLLAR:
+            case LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS:
+                return '\\';
+
+            default:
+                return '$';
+        }
     }
 }

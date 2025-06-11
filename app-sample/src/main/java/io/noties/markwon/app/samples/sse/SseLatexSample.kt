@@ -1,6 +1,7 @@
 package io.noties.markwon.app.samples.sse
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -25,6 +26,7 @@ import io.noties.markwon.app.utils.loadSseLatex
 import io.noties.markwon.app.utils.noOpDelegate
 import io.noties.markwon.app.utils.safeDrawing
 import io.noties.markwon.ext.latex.JLatexMathPlugin
+import io.noties.markwon.ext.latex.LatexParseStyle
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tasklist.TaskListPlugin
 import io.noties.markwon.html.HtmlPlugin
@@ -142,9 +144,9 @@ class SseLatexSample : MarkwonTextViewSample() {
             .usePlugin(StrikethroughPlugin.create())
             .usePlugin(MarkwonInlineParserPlugin.create())
             .usePlugin(JLatexMathPlugin.create(mBinding.textView.textSize) { builder ->
-                builder.inlinesEnabled(
-                    true
-                )
+                builder.inlinesEnabled(true)
+                .blockStyle(LatexParseStyle.STYLE_2_DOLLAR)
+                .inlineStyle(LatexParseStyle.STYLE_2_DOLLAR)
             })
             .usePlugin(ReadMeImageDestinationPlugin(null))
             .usePlugin(object : AbstractMarkwonPlugin() {
@@ -189,6 +191,11 @@ class SseLatexSample : MarkwonTextViewSample() {
             fullLatexStr = loadSseLatex(fragment.requireContext())
             val totalLength = fullLatexStr.length
             var currentLength = 0
+
+//            isSseFinished = true
+//            refreshMarkwon()
+//            return@launch
+
             flow<String> {
                 isSseFinished = false
                 while (this@launch.isActive && currentLength < totalLength) {
