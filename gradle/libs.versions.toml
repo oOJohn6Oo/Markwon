@@ -9,8 +9,7 @@ okhttp = "4.12.0"
 picasso = "2.71828"
 glide = "4.16.0"
 androidsvg = "1.4"
-androidgif15 = "1.2.29"
-androidgif20 = "1.2.29"
+androidgif = "1.2.29"
 jlatexmath = "0.2.0"
 prism4j = "2.0.0"
 debug = "5.1.0"
@@ -32,15 +31,13 @@ commonmark-strikethrough = { module = "com.atlassian.commonmark:commonmark-ext-g
 commonmark-table = { module = "com.atlassian.commonmark:commonmark-ext-gfm-tables", version.ref = "commonmark" }
 
 android-svg = { module = "com.caverock:androidsvg", version.ref = "androidsvg" }
-android-gif = { module = "pl.droidsonroids.gif:android-gif-drawable", version.ref = "androidgif15" }
-android-gif-impl = { module = "pl.droidsonroids.gif:android-gif-drawable", version.ref = "androidgif20" }
+android-gif-impl = { module = "pl.droidsonroids.gif:android-gif-drawable", version.ref = "androidgif" }
 
 jlatexmath-android = { module = "ru.noties:jlatexmath-android", version.ref = "jlatexmath" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 prism4j = { module = "io.noties:prism4j", version.ref = "prism4j" }
 debug = { module = "io.noties:debug", version.ref = "debug" }
 adapt = { module = "io.noties:adapt", version.ref = "adapt" }
-dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
@@ -51,7 +48,6 @@ commons-io = { module = "commons-io:commons-io", version.ref = "commonsio" }
 
 #annotation-processor
 prism4j-bundler = { module = "io.noties:prism4j-bundler", version.ref = "prism4j" }
-dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
 
 #test
 junit = { module = "junit:junit", version.ref = "junit" }

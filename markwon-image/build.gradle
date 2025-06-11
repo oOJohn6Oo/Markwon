@@ -9,13 +9,17 @@ android {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
     }
-}
+
+    compileOptions {
+        targetCompatibility rootProject.ext.get("target_java_version")
+        sourceCompatibility rootProject.ext.get("compatible_java_version")
+    }}
 
 dependencies {
 
     api project(':markwon-core')
 
-    compileOnly  libs.android.gif
+    compileOnly  libs.android.gif.impl
     compileOnly  libs.android.svg
     compileOnly libs.okhttp
     testImplementation libs.commons.io
