@@ -9,7 +9,11 @@ android {
         minSdkVersion config['min-sdk']
         targetSdkVersion config['target-sdk']
     }
-}
+
+    compileOptions {
+        targetCompatibility rootProject.ext.get("target_java_version")
+        sourceCompatibility rootProject.ext.get("compatible_java_version")
+    }}
 
 dependencies {
     // To use LinkifyCompat
