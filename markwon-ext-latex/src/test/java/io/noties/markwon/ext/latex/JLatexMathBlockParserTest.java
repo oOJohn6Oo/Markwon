@@ -54,11 +54,11 @@ public class JLatexMathBlockParserTest {
             "   $$$$$$$$$$$$$$$$$$$$$"
     };
 
-    private JLatexMathBlockParser.Factory factory;
+    private JLatexBlockParserFactory JLatexBlockParserFactory;
 
     @Before
     public void before() {
-        factory = new JLatexMathBlockParser.Factory();
+        JLatexBlockParserFactory = new JLatexBlockParserFactory();
     }
 
     @Test
@@ -69,7 +69,7 @@ public class JLatexMathBlockParserTest {
         when(state.getIndent()).thenReturn(Parsing.CODE_BLOCK_INDENT);
 
         // hm, interesting, `BlockStart.none()` actually returns null
-        final BlockStart start = factory.tryStart(state, null);
+        final BlockStart start = JLatexBlockParserFactory.tryStart(state, null);
         assertNull(start);
     }
 
@@ -79,7 +79,7 @@ public class JLatexMathBlockParserTest {
         for (String line : NO_MATCH) {
             final ParserState state = createState(line);
 
-            assertNull(factory.tryStart(state, null));
+            assertNull(JLatexBlockParserFactory.tryStart(state, null));
         }
     }
 
@@ -89,7 +89,7 @@ public class JLatexMathBlockParserTest {
         for (String line : MATCH) {
             final ParserState state = createState(line);
 
-            final BlockStart start = factory.tryStart(state, null);
+            final BlockStart start = JLatexBlockParserFactory.tryStart(state, null);
             assertNotNull(start);
 
             // hm...

@@ -1,18 +1,21 @@
 package io.noties.markwon.core.factory;
 
-import io.noties.markwon.CacheableSpanFactory;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.RenderProps;
+import io.noties.markwon.SpanFactory;
 import io.noties.markwon.core.CoreProps;
 import io.noties.markwon.core.spans.HeadingSpan;
 
-public class HeadingSpanFactory extends CacheableSpanFactory {
+public class HeadingSpanFactory implements SpanFactory {
+    @Nullable
     @Override
-    public Object createSpan(MarkwonConfiguration configuration, RenderProps props) {
+    public Object getSpans(@NonNull MarkwonConfiguration configuration, @NonNull RenderProps props) {
         return new HeadingSpan(
                 configuration.theme(),
                 CoreProps.HEADING_LEVEL.require(props)
         );
     }
-
 }

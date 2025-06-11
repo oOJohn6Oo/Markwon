@@ -59,3 +59,36 @@ $$
 $$
 x \in (1, 3)
 $$
+
+
+## Latex style test
+
+### Using LatexParseStyle.STYLE_2_DOLLAR
+
+This is a inline $$ x \in (1, 3) $$ style test
+
+This is a block style test
+$$
+x \in (1, 3)
+$$
+Block style test end
+
+### Using LatexParseStyle.STYLE_SLASH_DOLLAR
+
+This is a inline \$ x \in (1, 3) \$ style test
+
+This is a block style test
+\$
+x \in (1, 3)
+\$
+Block style test end
+
+### Using LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS
+
+This is a inline \(x \in (1, 3) \) style test
+
+This is a block style test
+\[
+x \in (1, 3)
+\]
+Block style test end

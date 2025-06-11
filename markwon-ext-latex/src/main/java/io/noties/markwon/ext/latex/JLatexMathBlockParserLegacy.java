@@ -55,7 +55,7 @@ class JLatexMathBlockParserLegacy extends AbstractBlockParser {
 
     @Override
     public void closeBlock() {
-        block.latex(builder.toString());
+        block.latex(builder.toString(), true);
     }
 
     public static class Factory extends AbstractBlockParserFactory {

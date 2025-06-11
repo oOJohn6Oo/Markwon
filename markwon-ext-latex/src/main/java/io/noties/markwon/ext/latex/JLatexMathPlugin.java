@@ -125,12 +125,22 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
 
         final ExecutorService executorService;
 
+        @LatexParseStyle
+        final int inlineStyle;
+
+        @LatexParseStyle
+        final int blockStyle;
+
         Config(@NonNull Builder builder) {
             this.theme = builder.theme.build();
             this.blocksEnabled = builder.blocksEnabled;
             this.blocksLegacy = builder.blocksLegacy;
             this.inlinesEnabled = builder.inlinesEnabled;
             this.errorHandler = builder.errorHandler;
+
+            this.inlineStyle = builder.inlineStyle;
+            this.blockStyle = builder.blockStyle;
+
             // @since 4.0.0
             ExecutorService executorService = builder.executorService;
             if (executorService == null) {
@@ -147,8 +157,8 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
     private final JLatexBlockImageSizeResolver jLatexBlockImageSizeResolver;
     private final ImageSizeResolver inlineImageSizeResolver;
 
-    private HashMap<String, JLatextAsyncDrawable> cachedInlineMap = new HashMap<>();
-    private HashMap<String, JLatextAsyncDrawable> cachedBlockMap = new HashMap<>();
+    private final HashMap<String, JLatextAsyncDrawable> cachedInlineMap = new HashMap<>();
+    private final HashMap<String, JLatextAsyncDrawable> cachedBlockMap = new HashMap<>();
 
 
     @SuppressWarnings("WeakerAccess")
@@ -164,7 +174,7 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
         if (config.inlinesEnabled) {
             registry.require(MarkwonInlineParserPlugin.class)
                     .factoryBuilder()
-                    .addInlineProcessor(new JLatexMathInlineProcessor());
+                    .addInlineProcessor(new JLatexMathInlineProcessor(config.inlineStyle));
         }
     }
 
@@ -175,7 +185,7 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
             if (config.blocksLegacy) {
                 builder.customBlockParserFactory(new JLatexMathBlockParserLegacy.Factory());
             } else {
-                builder.customBlockParserFactory(new JLatexMathBlockParser.Factory());
+                builder.customBlockParserFactory(new JLatexBlockParserFactory(config.blockStyle));
             }
         }
     }
@@ -209,8 +219,9 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
                 final MarkwonConfiguration configuration = visitor.configuration();
 
                 JLatextAsyncDrawable drawable = null;
+                boolean isBlockComplete = jLatexMathBlock.isComplete();
 
-                if (cachedBlockMap.containsKey(latex)){
+                if (isBlockComplete && cachedBlockMap.containsKey(latex)){
                     drawable = cachedBlockMap.get(latex);
                 }
                 if (drawable == null) {
@@ -219,8 +230,12 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
                             jLatexAsyncDrawableLoader,
                             jLatexBlockImageSizeResolver,
                             null,
-                            true);
-                    cachedBlockMap.put(latex, drawable);
+                            true,
+                            isBlockComplete
+                            );
+                    if(isBlockComplete){
+                        cachedBlockMap.put(latex, drawable);
+                    }
                 }
 
 
@@ -266,7 +281,8 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
                             jLatexAsyncDrawableLoader,
                             inlineImageSizeResolver,
                             null,
-                            false);
+                            false,
+                            true);
                     cachedInlineMap.put(latex, drawable);
                 }
                 final AsyncDrawableSpan span = new JLatexInlineAsyncDrawableSpan(
@@ -314,6 +330,11 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
         // @since 4.0.0
         private ExecutorService executorService;
 
+        @LatexParseStyle
+        private int inlineStyle = LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS;
+        @LatexParseStyle
+        private int blockStyle = LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS;
+
         Builder(@NonNull JLatexMathTheme.Builder builder) {
             this.theme = builder;
         }
@@ -350,6 +371,16 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
         @NonNull
         public Builder inlinesEnabled(boolean inlinesEnabled) {
             this.inlinesEnabled = inlinesEnabled;
+            return this;
+        }
+
+        public Builder inlineStyle(@LatexParseStyle int style) {
+            this.inlineStyle = style;
+            return this;
+        }
+
+        public Builder blockStyle(@LatexParseStyle int style) {
+            this.blockStyle = style;
             return this;
         }
 
@@ -392,6 +423,13 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
 
             // check for currently running tasks associated with provided drawable
             final Future<?> future = cache.get(drawable);
+
+            boolean isLatex = drawable instanceof JLatextAsyncDrawable;
+            if(!isLatex) return;
+
+            if (!((JLatextAsyncDrawable) drawable).isComplete()) {
+                return;
+            }
 
             // if it's present -> proceed with new execution
             // as asyncDrawable is immutable, it won't have destination changed (so there is no need

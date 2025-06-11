@@ -5,10 +5,7 @@ import androidx.annotation.NonNull;
 import org.commonmark.internal.util.Parsing;
 import org.commonmark.node.Block;
 import org.commonmark.parser.block.AbstractBlockParser;
-import org.commonmark.parser.block.AbstractBlockParserFactory;
 import org.commonmark.parser.block.BlockContinue;
-import org.commonmark.parser.block.BlockStart;
-import org.commonmark.parser.block.MatchedBlockParser;
 import org.commonmark.parser.block.ParserState;
 
 /**
@@ -17,17 +14,33 @@ import org.commonmark.parser.block.ParserState;
  */
 class JLatexMathBlockParser extends AbstractBlockParser {
 
-    private static final char DOLLAR = '$';
+    /**
+     *  0 => $$;<br/>
+     *  1 => \$; <br/>
+     *  2 => \[;<br/>
+     * @see JLatexMathBlockParser#getSymbolByStyle
+     */
+    @LatexParseStyle
+    private final int parseStyle;
+
     private static final char SPACE = ' ';
 
     private final JLatexMathBlock block = new JLatexMathBlock();
 
     private final StringBuilder builder = new StringBuilder();
 
-    private final int signs;
+    private final int startSignCount;
 
-    JLatexMathBlockParser(int signs) {
-        this.signs = signs;
+    private boolean isParseEnded = false;
+
+    JLatexMathBlockParser(int startSignCount) {
+        this.startSignCount = startSignCount;
+        this.parseStyle = LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS;
+    }
+
+    JLatexMathBlockParser(int startSignCount, @LatexParseStyle int parseStyle) {
+        this.startSignCount = startSignCount;
+        this.parseStyle = parseStyle;
     }
 
     @Override
@@ -40,13 +53,25 @@ class JLatexMathBlockParser extends AbstractBlockParser {
         final int nextNonSpaceIndex = parserState.getNextNonSpaceIndex();
         final CharSequence line = parserState.getLine();
         final int length = line.length();
+        isParseEnded = false;
 
         // check for closing
         if (parserState.getIndent() < Parsing.CODE_BLOCK_INDENT) {
-            if (consume(DOLLAR, line, nextNonSpaceIndex, length) == signs) {
+            int consumed;
+            int signsMultiple;
+            if(this.parseStyle == LatexParseStyle.STYLE_2_DOLLAR){
+                signsMultiple = 1;
+                consumed = consume('$', line, nextNonSpaceIndex, length);
+            }else{
+                signsMultiple = 2;
+                boolean canMatchMultiple = this.parseStyle == LatexParseStyle.STYLE_SLASH_DOLLAR;
+                consumed = consume(getSymbolByStyle(parseStyle, false), line, nextNonSpaceIndex, length, canMatchMultiple);
+            }
+            if (consumed == startSignCount) {
                 // okay, we have our number of signs
                 // let's consume spaces until the end
-                if (Parsing.skip(SPACE, line, nextNonSpaceIndex + signs, length) == length) {
+                if (Parsing.skip(SPACE, line, nextNonSpaceIndex + startSignCount * signsMultiple, length) == length) {
+                    isParseEnded = true;
                     return BlockContinue.finished();
                 }
             }
@@ -63,51 +88,43 @@ class JLatexMathBlockParser extends AbstractBlockParser {
 
     @Override
     public void closeBlock() {
-        block.latex(builder.toString());
+        block.latex(builder.toString(), isParseEnded);
     }
 
-    public static class Factory extends AbstractBlockParserFactory {
-
-        @Override
-        public BlockStart tryStart(ParserState state, MatchedBlockParser matchedBlockParser) {
-
-            // let's define the spec:
-            //  * 0-3 spaces before are allowed (Parsing.CODE_BLOCK_INDENT = 4)
-            //  * 2+ subsequent `$` signs
-            //  * any optional amount of spaces
-            //  * new line
-            //  * block is closed when the same amount of opening signs is met
-
-            final int indent = state.getIndent();
-
-            // check if it's an indented code block
-            if (indent >= Parsing.CODE_BLOCK_INDENT) {
-                return BlockStart.none();
+    /**
+     * This is for style 1 and 2
+     * For style 1, we could have multiple s
+     * For style 2, we can only have 1 s
+     */
+    static int consume(String s, @NonNull CharSequence line, int start, int end, boolean canMatchMultiple) {
+        final int lengthS = s.length();
+        if(canMatchMultiple){
+            int matchedCount = 0;
+            for (int i = start; i < end; i++) {
+                for (int j = 0; j < lengthS && i < end; j++) {
+                    if (s.charAt(j) != line.charAt(i)) {
+                        return matchedCount;
+                    }
+                    i++;
+                }
+                matchedCount++;
             }
-
-            final int nextNonSpaceIndex = state.getNextNonSpaceIndex();
-            final CharSequence line = state.getLine();
-            final int length = line.length();
-
-            final int signs = consume(DOLLAR, line, nextNonSpaceIndex, length);
-
-            // 2 is minimum
-            if (signs < 2) {
-                return BlockStart.none();
-            }
-
-            // consume spaces until the end of the line, if any other content is found -> NONE
-            if (Parsing.skip(SPACE, line, nextNonSpaceIndex + signs, length) != length) {
-                return BlockStart.none();
-            }
-
-            return BlockStart.of(new JLatexMathBlockParser(signs))
-                    .atIndex(length + 1);
+            return matchedCount;
         }
+
+        if(line.length() >= s.length()){
+            for (int i = 0; i < lengthS; i++){
+                if (s.charAt(i) != line.charAt(i)){
+                    return 0;
+                }
+            }
+            return 1;
+        }
+
+        return 0;
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private static int consume(char c, @NonNull CharSequence line, int start, int end) {
+    static int consume(char c, @NonNull CharSequence line, int start, int end) {
         for (int i = start; i < end; i++) {
             if (c != line.charAt(i)) {
                 return i - start;
@@ -116,4 +133,17 @@ class JLatexMathBlockParser extends AbstractBlockParser {
         // all consumed
         return end - start;
     }
+
+    static String getSymbolByStyle(int style, boolean start) {
+        switch (style) {
+            case LatexParseStyle.STYLE_2_DOLLAR:
+                return "$$";
+            case LatexParseStyle.STYLE_SLASH_DOLLAR:
+                return "\\$";
+            default:
+                if(start) return "\\[";
+                else return "\\]";
+        }
+    }
+
 }

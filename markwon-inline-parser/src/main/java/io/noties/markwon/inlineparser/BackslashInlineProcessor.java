@@ -21,7 +21,14 @@ public class BackslashInlineProcessor extends InlineProcessor {
     protected Node parse() {
         index++;
         Node node;
-        if (peek() == '\n') {
+        char nextChar = peek();
+
+        if(nextChar == '(' || nextChar == ')'
+        || nextChar == '[' || nextChar == ']'
+        || nextChar == '$')
+            return null;
+
+        if (nextChar == '\n') {
             node = new HardLineBreak();
             index++;
         } else if (index < input.length() && ESCAPABLE.matcher(input.substring(index, index + 1)).matches()) {
