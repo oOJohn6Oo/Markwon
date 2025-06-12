@@ -32,6 +32,7 @@ import io.noties.markwon.image.AsyncDrawableSpan;
 import io.noties.markwon.image.DrawableUtils;
 import io.noties.markwon.image.ImageSizeResolver;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
+import kotlin.jvm.Volatile;
 import ru.noties.jlatexmath.JLatexMathDrawable;
 
 /**
@@ -410,6 +411,7 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
     static class JLatexAsyncDrawableLoader extends AsyncDrawableLoader {
         private final Config config;
         private final Handler handler = new Handler(Looper.getMainLooper());
+        @Volatile
         private final Map<AsyncDrawable, Future<?>> cache = new HashMap<>(3);
 
         JLatexAsyncDrawableLoader(@NonNull Config config) {
@@ -431,17 +433,26 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
                 return;
             }
 
+            final JLatextAsyncDrawable tempDrawable = (JLatextAsyncDrawable) drawable;
+
             // if it's present -> proceed with new execution
             // as asyncDrawable is immutable, it won't have destination changed (so there is no need
             // to cancel any started tasks)
             if (future == null) {
-
-                cache.put(drawable, config.executorService.submit(new Runnable() {
+                cache.put(tempDrawable, config.executorService.submit(new Runnable() {
                     @Override
                     public void run() {
                         // @since 4.0.1 wrap in try-catch block and add error logging
                         try {
-                            execute();
+                            final JLatexMathDrawable jLatexMathDrawable;
+
+                            if (tempDrawable.isBlock()) {
+                                jLatexMathDrawable = createBlockDrawable(tempDrawable);
+                            } else {
+                                jLatexMathDrawable = createInlineDrawable(tempDrawable);
+                            }
+
+                            setResult(tempDrawable, jLatexMathDrawable);
                         } catch (Throwable t) {
                             // @since 4.3.0 add error handling
                             final ErrorHandler errorHandler = config.errorHandler;
@@ -449,36 +460,22 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
                                 // as before
                                 Log.e(
                                         "JLatexMathPlugin",
-                                        "Error displaying latex: `" + drawable.getDestination() + "`",
+                                        "Error displaying latex: `" + tempDrawable.getDestination() + "`",
                                         t);
                             } else {
                                 // just call `getDestination` without casts and checks
                                 final Drawable errorDrawable = errorHandler.handleError(
-                                        drawable.getDestination(),
+                                        tempDrawable.getDestination(),
                                         t
                                 );
                                 if (errorDrawable != null) {
                                     DrawableUtils.applyIntrinsicBoundsIfEmpty(errorDrawable);
-                                    setResult(drawable, errorDrawable);
+                                    setResult(tempDrawable, errorDrawable);
                                 }
                             }
                         }
                     }
 
-                    private void execute() {
-
-                        final JLatexMathDrawable jLatexMathDrawable;
-
-                        final JLatextAsyncDrawable jLatextAsyncDrawable = (JLatextAsyncDrawable) drawable;
-
-                        if (jLatextAsyncDrawable.isBlock()) {
-                            jLatexMathDrawable = createBlockDrawable(jLatextAsyncDrawable);
-                        } else {
-                            jLatexMathDrawable = createInlineDrawable(jLatextAsyncDrawable);
-                        }
-
-                        setResult(drawable, jLatexMathDrawable);
-                    }
                 }));
             }
         }

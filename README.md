@@ -4,13 +4,20 @@
 Compare to the original repo:
 
 - [ ] Upgrade commonmark
+- [ ] Make an aar and publish it
+- [ ] Re-packaging the `prism4j.bundler` to avoid the compile warning due to JAVA version compatible issue
+- [x] fix Latex and Image blink issue
+- [x] Support background Image request
 - [x] Upgraded to the latest AGP version
 - [x] SSE demo
-- [x] fix Latex and Image blink issue
 - [x] Edge-to-Edge support for Demo APP
 - [x] Back press animation support
 
-[DemoAPK](https://github.com/user-attachments/files/20670738/markwon-release.apk.md)
+[DemoAPK](https://github.com/user-attachments/files/20714581/markwon-release.apk.md)
+
+---
+
+---
 
 ---
 

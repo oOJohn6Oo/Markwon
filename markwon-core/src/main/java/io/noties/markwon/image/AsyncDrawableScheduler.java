@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -36,8 +37,7 @@ public abstract class AsyncDrawableScheduler {
 
 
         final AsyncDrawableSpan[] spans = extractSpans(textView);
-        if (spans != null
-                && spans.length > 0) {
+        if (spans != null && spans.length > 0) {
 
             if (textView.getTag(R.id.markwon_drawables_scheduler) == null) {
                 final View.OnAttachStateChangeListener listener = new View.OnAttachStateChangeListener() {

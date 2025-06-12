@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import io.noties.markwon.image.ImageItem;
+import io.noties.markwon.image.ImageLoadedNotifier;
 import io.noties.markwon.image.ImagesPlugin;
 import io.noties.markwon.image.SchemeHandler;
 
@@ -37,7 +38,7 @@ public class DataUriSchemeHandler extends SchemeHandler {
 
     @NonNull
     @Override
-    public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener) {
+    public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImageLoadedNotifier notifier) {
 
         if (!raw.startsWith(START)) {
             throw new IllegalStateException("Invalid data-uri: " + raw);

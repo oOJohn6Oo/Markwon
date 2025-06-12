@@ -26,10 +26,6 @@ class AsyncDrawableLoaderBuilder {
 
     boolean isBuilt;
 
-    @Nullable
-    ImagesPlugin.OnImageRequestListener onImageRequestListener;
-
-
     AsyncDrawableLoaderBuilder(boolean asyncRequest) {
 
         // @since 4.0.0
@@ -82,10 +78,6 @@ class AsyncDrawableLoaderBuilder {
     void removeMediaDecoder(@NonNull String contentType) {
         checkState();
         mediaDecoders.remove(contentType);
-    }
-
-    void setOnImageRequestListener(@Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener) {
-        this.onImageRequestListener = onImageRequestListener;
     }
 
     /**

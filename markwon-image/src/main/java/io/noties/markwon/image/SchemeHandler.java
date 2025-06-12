@@ -22,11 +22,18 @@ public abstract class SchemeHandler {
      * @see ImageItem#withDecodingNeeded(String, java.io.InputStream)
      */
     @NonNull
-    public abstract ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener);
+    public abstract ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImageLoadedNotifier notifier);
 
     /**
      * @since 4.0.0
      */
     @NonNull
     public abstract Collection<String> supportedSchemes();
+
+    /**
+     * Give loader a chance to fetch Loaded ImageItem from cache without creating a {@link ImageLoadedNotifier}
+     */
+    public ImageItem prefetch(@NonNull String imgUrl, @NonNull Uri uri){
+        return null;
+    }
 }

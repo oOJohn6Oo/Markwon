@@ -11,12 +11,14 @@ import io.noties.markwon.app.readme.*
 import io.noties.markwon.app.sample.ui.MarkwonSample
 import io.noties.markwon.app.utils.*
 import io.noties.markwon.ext.latex.JLatexMathPlugin
-import io.noties.markwon.ext.latex.LatexParseStyle
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.noties.markwon.ext.tasklist.TaskListPlugin
 import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.ImagesPlugin
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
+import io.noties.markwon.recycler.MarkwonAdapter
+import io.noties.markwon.recycler.SimpleEntry
+import io.noties.markwon.recycler.table.TableEntry
 import io.noties.markwon.recycler.table.TableEntryPlugin
 import io.noties.markwon.sample.annotations.*
 import io.noties.markwon.syntax.Prism4jThemeDefault
@@ -24,17 +26,18 @@ import io.noties.markwon.syntax.SyntaxHighlightPlugin
 import io.noties.prism4j.Prism4j
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import org.commonmark.ext.gfm.tables.TableBlock
 import org.commonmark.node.FencedCodeBlock
 
 @Suppress("unused")
 @MarkwonSampleInfo(
-    id = "20250609030068",
-    title = "SSE Latex",
-    description = "Display Latex + Markdown in SSE style",
-    artifacts = [MarkwonArtifact.SSE],
+    id = "20250612030070",
+    title = "SSE Recycler README",
+    description = "Display README in SSE style Using RecyclerView",
+    artifacts = [MarkwonArtifact.SSE, MarkwonArtifact.RECYCLER],
     tags = [Tag.rendering]
 )
-class SseLatexSample : MarkwonSample() {
+class SseRecyclerReadMeSample : MarkwonSample() {
     private var _mBinding: SampleSseCommonBinding? = null
     val mBinding: SampleSseCommonBinding
         get() = _mBinding!!
@@ -57,14 +60,15 @@ class SseLatexSample : MarkwonSample() {
 
     override fun onViewCreated(view: View) {
         _mBinding = SampleSseCommonBinding.bind(view)
-        mBinding.scrollView.isVisible = true
-        mBinding.recyclerView.isVisible = false
+        mBinding.scrollView.isVisible = false
+        mBinding.recyclerView.isVisible = true
         mBinding.setupEdge2Edge()
         mBinding.setupSpeedAndSeeker(currentSpeed){
             currentSpeed = it
         }
         initMarkwon(view)
         loadSSEData()
+
     }
 
     private fun initMarkwon(view: View) {
@@ -83,8 +87,6 @@ class SseLatexSample : MarkwonSample() {
             .usePlugin(MarkwonInlineParserPlugin.create())
             .usePlugin(JLatexMathPlugin.create(mBinding.textView.textSize) { builder ->
                 builder.inlinesEnabled(true)
-                    .blockStyle(LatexParseStyle.STYLE_2_DOLLAR)
-                    .inlineStyle(LatexParseStyle.STYLE_2_DOLLAR)
             })
             .usePlugin(ReadMeImageDestinationPlugin(null))
             .usePlugin(object : AbstractMarkwonPlugin() {
@@ -106,24 +108,37 @@ class SseLatexSample : MarkwonSample() {
                 }
             })
             .build()
+
+
+        val adapter = MarkwonAdapter.builderTextViewIsRoot(R.layout.adapter_node)
+            .include(
+                FencedCodeBlock::class.java,
+                SimpleEntry.create(R.layout.adapter_node_code_block, R.id.text_view)
+            )
+            .include(
+                TableBlock::class.java,
+                TableEntry.create { builder: TableEntry.Builder ->
+                    builder
+                        .tableLayout(R.layout.adapter_node_table_block, R.id.table_layout)
+                        .textLayoutIsRoot(R.layout.view_table_entry_cell)
+                }
+            )
+            .build()
+        mBinding.recyclerView.itemAnimator = null
+        mBinding.recyclerView.setAdapter(adapter)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "NotifyDataSetChanged")
     private fun loadSSEData() {
-        mBinding.scrollView.setOnTouchListener { _, _ ->
+        mBinding.recyclerView.setOnTouchListener { _, _ ->
             enableAutoScroll = false
             false
         }
 
         fragment.lifecycleScope.launch(Dispatchers.Main) {
-            fullLatexStr = loadSseLatex(fragment.requireContext())
+            fullLatexStr = loadReadMe(fragment.requireContext())
             val totalLength = fullLatexStr.length
             var currentLength = 0
-
-//            isSseFinished = true
-//            refreshMarkwon()
-//            return@launch
-
             flow {
                 isSseFinished = false
                 while (this@launch.isActive && currentLength < totalLength) {
@@ -133,24 +148,34 @@ class SseLatexSample : MarkwonSample() {
                     isSseFinished = false
                 }
                 isSseFinished = true
-            }.map { markwon.render(markwon.parse(it)) }
+            }.map { markwon.parse(it) }
                 .flowOn(Dispatchers.IO)
                 .catch { }
                 .collect {
-                    markwon.setParsedMarkdown(mBinding.textView, it)
-                    if (enableAutoScroll) {
-                        mBinding.scrollView.fullScroll(View.FOCUS_DOWN)
+                    (mBinding.recyclerView.adapter as MarkwonAdapter).apply {
+                        setParsedMarkdown(markwon, it)
+                        notifyDataSetChanged()
+                        if (enableAutoScroll) {
+                            mBinding.recyclerView.smoothScrollToPosition(this.itemCount)
+                        }
                     }
                 }
         }
     }
 
-    private fun refreshMarkwon() {
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun refreshMarkwon(){
         fragment.viewLifecycleOwner.lifecycleScope.launch {
-            val node = withContext(Dispatchers.IO) {
-                markwon.render(markwon.parse(fullLatexStr))
+            val node = withContext(Dispatchers.IO){
+                markwon.parse(fullLatexStr)
             }
-            markwon.setParsedMarkdown(mBinding.textView, node)
+
+            (mBinding.recyclerView.adapter as MarkwonAdapter).apply {
+                setParsedMarkdown(markwon, node)
+                notifyDataSetChanged()
+            }
         }
     }
+
 }

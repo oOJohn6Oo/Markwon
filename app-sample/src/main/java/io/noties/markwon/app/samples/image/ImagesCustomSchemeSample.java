@@ -12,6 +12,7 @@ import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.app.sample.ui.MarkwonTextViewSample;
 import io.noties.markwon.image.ImageItem;
+import io.noties.markwon.image.ImageLoadedNotifier;
 import io.noties.markwon.image.ImagesPlugin;
 import io.noties.markwon.image.SchemeHandler;
 import io.noties.markwon.image.network.NetworkSchemeHandler;
@@ -49,10 +50,10 @@ public class ImagesCustomSchemeSample extends MarkwonTextViewSample {
 
             @NonNull
             @Override
-            public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener) {
+            public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImageLoadedNotifier notifier) {
               // just replace it with https for the sack of sample
               final String url = raw.replace("myownscheme", "https");
-              return handler.handle(url, Uri.parse(url), onImageRequestListener);
+              return handler.handle(url, Uri.parse(url), notifier);
             }
 
             @NonNull

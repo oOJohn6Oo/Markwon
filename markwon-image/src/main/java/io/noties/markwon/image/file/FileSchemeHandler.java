@@ -18,7 +18,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import io.noties.markwon.image.AsyncDrawable;
 import io.noties.markwon.image.ImageItem;
+import io.noties.markwon.image.ImageLoadedNotifier;
 import io.noties.markwon.image.ImagesPlugin;
 import io.noties.markwon.image.SchemeHandler;
 
@@ -64,7 +66,7 @@ public class FileSchemeHandler extends SchemeHandler {
 
     @NonNull
     @Override
-    public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImagesPlugin.OnImageRequestListener onImageRequestListener) {
+    public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImageLoadedNotifier notifier) {
         final List<String> segments = uri.getPathSegments();
         if (segments == null || segments.isEmpty()) {
             // pointing to file & having no path segments is no use
