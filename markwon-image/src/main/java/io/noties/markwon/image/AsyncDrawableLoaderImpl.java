@@ -33,9 +33,6 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
     // @since 4.0.0 use a hash-map with a AsyncDrawable as key for multiple requests
     //  for the same destination
     private final Map<AsyncDrawable, Future<?>> requests = new HashMap<>(2);
-    @Nullable
-    private ImagesPlugin.OnImageRequestListener onImageRequestListener;
-
 
     AsyncDrawableLoaderImpl(@NonNull AsyncDrawableLoaderBuilder builder) {
         this(builder, new Handler(Looper.getMainLooper()));
@@ -51,7 +48,6 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
         this.placeholderProvider = builder.placeholderProvider;
         this.errorHandler = builder.errorHandler;
         this.handler = handler;
-        this.onImageRequestListener = builder.onImageRequestListener;
     }
 
     @Override
@@ -109,7 +105,15 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
                     }
 
                     // handle scheme
-                    final ImageItem imageItem = schemeHandler.handle(destination, uri, onImageRequestListener);
+                    ImageItem imageItem = schemeHandler.prefetch(destination, uri);
+                    if(imageItem == null){
+                        imageItem = schemeHandler.handle(destination, uri, (success) -> {
+                            if(success){
+                                // Invoke self to trigger encode
+                                load(asyncDrawable);
+                            }
+                        });
+                    }
 
                     // if resulting imageItem needs further decoding -> proceed
                     if (!imageItem.hasDecodingNeeded()) {

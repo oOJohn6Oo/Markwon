@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import io.noties.markwon.image.ImageItem;
-import io.noties.markwon.image.ImagesPlugin.OnImageRequestListener;
+import io.noties.markwon.image.ImageLoadedNotifier;
 import io.noties.markwon.image.SchemeHandler;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -60,15 +60,15 @@ public class OkHttpNetworkSchemeHandler extends SchemeHandler {
 
     @NonNull
     @Override
-    public ImageItem handle(@NonNull String raw, @NonNull Uri uri,@Nullable OnImageRequestListener onImageRequestListener) {
+    public ImageItem handle(@NonNull String raw, @NonNull Uri uri,@Nullable ImageLoadedNotifier notifier) {
         if(asyncRequest){
-            return doAsyncRequest(raw, onImageRequestListener);
+            return doAsyncRequest(raw, notifier);
         }else{
             return doSyncRequest(raw);
         }
     }
 
-    private ImageItem.WithDecodingNeeded doAsyncRequest(String imgUrl,@Nullable OnImageRequestListener onImageRequestListener){
+    private ImageItem.WithDecodingNeeded doAsyncRequest(String imgUrl,@Nullable ImageLoadedNotifier notifier){
         ImageItem.WithDecodingNeeded previousItem = imgPathMap.get(imgUrl);
         if (previousItem != null) {
             if (previousItem.isProcessing()) return previousItem;
@@ -88,8 +88,8 @@ public class OkHttpNetworkSchemeHandler extends SchemeHandler {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 tempItem.setIsProcessing(false);
-                if (onImageRequestListener != null) {
-                    onImageRequestListener.onImageRequestFinished(imgUrl, false);
+                if (notifier != null) {
+                    notifier.doNotifyUI(false);
                 }
             }
 
@@ -108,8 +108,8 @@ public class OkHttpNetworkSchemeHandler extends SchemeHandler {
                 }else{
                     tempItem.setIsProcessing(false);
                 }
-                if (onImageRequestListener != null) {
-                    onImageRequestListener.onImageRequestFinished(imgUrl, tempItem.inputStream() != null);
+                if (notifier != null) {
+                    notifier.doNotifyUI(tempItem.inputStream() != null);
                 }
             }
         });

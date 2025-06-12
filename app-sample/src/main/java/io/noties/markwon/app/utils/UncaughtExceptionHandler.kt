@@ -4,7 +4,7 @@ package io.noties.markwon.app.utils
 class UncaughtExceptionHandler(private val origin: Thread.UncaughtExceptionHandler?)
     : Thread.UncaughtExceptionHandler {
 
-    override fun uncaughtException(t: Thread?, e: Throwable?) {
+    override fun uncaughtException(t: Thread, e: Throwable) {
         
     }
 }

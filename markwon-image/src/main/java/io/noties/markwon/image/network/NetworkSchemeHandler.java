@@ -1,6 +1,7 @@
 package io.noties.markwon.image.network;
 
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,12 +14,14 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import io.noties.markwon.image.ImageItem;
 import io.noties.markwon.image.ImageItem.WithDecodingNeeded;
-import io.noties.markwon.image.ImagesPlugin.OnImageRequestListener;
+import io.noties.markwon.image.ImageLoadedNotifier;
+import io.noties.markwon.image.MediaDecoder;
 import io.noties.markwon.image.SchemeHandler;
 
 /**
@@ -34,7 +37,7 @@ public class NetworkSchemeHandler extends SchemeHandler {
 
     private final boolean asyncRequest;
 
-    private final HashMap<String, WithDecodingNeeded> cachedImageItems = new HashMap<>();
+    private final ConcurrentHashMap<String, WithDecodingNeeded> cachedImageItems = new ConcurrentHashMap<>();
 
     private final ExecutorService requestExecutor = Executors.newFixedThreadPool(12);
 
@@ -52,11 +55,16 @@ public class NetworkSchemeHandler extends SchemeHandler {
         this.asyncRequest = asyncRequest;
     }
 
+    @Override
+    public ImageItem prefetch(@NonNull String imgUrl, @NonNull Uri uri) {
+        return cachedImageItems.get(imgUrl);
+    }
+
     @NonNull
     @Override
-    public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable OnImageRequestListener onImageRequestListener) {
+    public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImageLoadedNotifier notifier) {
         if (asyncRequest) {
-            return onAsyncRequestImage(raw, onImageRequestListener);
+            return onAsyncRequestImage(raw, notifier);
         }
         return onSyncRequestImage(raw);
     }
@@ -75,6 +83,7 @@ public class NetworkSchemeHandler extends SchemeHandler {
                 final String contentType = contentType(connection.getHeaderField("Content-Type"));
                 final InputStream inputStream = new BufferedInputStream(connection.getInputStream());
                 imageItem = ImageItem.withDecodingNeeded(contentType, inputStream);
+                cachedImageItems.put(imgUrl, imageItem);
             } else {
                 throw new IOException("Bad response code: " + responseCode + ", url: " + imgUrl);
             }
@@ -86,7 +95,7 @@ public class NetworkSchemeHandler extends SchemeHandler {
         return imageItem;
     }
 
-    private WithDecodingNeeded onAsyncRequestImage(@NonNull String imgUrl, @Nullable OnImageRequestListener onImageRequestListener){
+    private WithDecodingNeeded onAsyncRequestImage(@NonNull String imgUrl, @Nullable ImageLoadedNotifier notifier){
         WithDecodingNeeded previousItem = cachedImageItems.get(imgUrl);
         if (previousItem != null) {
             if (previousItem.isProcessing()) return previousItem;
@@ -96,11 +105,11 @@ public class NetworkSchemeHandler extends SchemeHandler {
             cachedImageItems.put(imgUrl, previousItem);
         }
         final WithDecodingNeeded tempItem = previousItem;
-        requestExecutor.submit(() -> doAsyncRequest(imgUrl, tempItem, onImageRequestListener));
+        requestExecutor.submit(() -> doAsyncRequest(imgUrl, tempItem, notifier));
         return previousItem;
     }
 
-    private void doAsyncRequest(@NonNull String imgUrl, WithDecodingNeeded imageItem,@Nullable OnImageRequestListener onImageRequestListener) {
+    private void doAsyncRequest(@NonNull String imgUrl, WithDecodingNeeded imageItem, @Nullable ImageLoadedNotifier notifier) {
         boolean result = false;
         try {
             final URL url = new URL(imgUrl);
@@ -122,8 +131,8 @@ public class NetworkSchemeHandler extends SchemeHandler {
             imageItem.setIsProcessing(false);
 //            throw new IllegalStateException("Exception obtaining network resource: " + imgUrl, e);
         } finally {
-            if (onImageRequestListener != null){
-                onImageRequestListener.onImageRequestFinished(imgUrl, result);
+            if (notifier != null) {
+                notifier.doNotifyUI(result);
             }
         }
     }

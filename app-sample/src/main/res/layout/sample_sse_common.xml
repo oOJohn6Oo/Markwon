@@ -20,6 +20,13 @@
             android:paddingHorizontal="16dp"
             tools:text="\(sdfjlsdjfl\)\[" />
     </ScrollView>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:paddingBottom="64dp"
+        android:layout_height="match_parent"/>
 
     <ViewSwitcher
         android:id="@+id/switcher_fg_sse"

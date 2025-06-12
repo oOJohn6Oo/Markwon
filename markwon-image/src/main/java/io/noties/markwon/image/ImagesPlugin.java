@@ -126,10 +126,6 @@ public class ImagesPlugin extends AbstractMarkwonPlugin {
         return this;
     }
 
-    public void setOnImageRequestListener(@Nullable OnImageRequestListener onImageRequestListener) {
-        builder.setOnImageRequestListener(onImageRequestListener);
-    }
-
     /**
      * @since 4.0.0
      */
@@ -194,10 +190,6 @@ public class ImagesPlugin extends AbstractMarkwonPlugin {
          */
         @Nullable
         Drawable handleError(@NonNull String url, @NonNull Throwable throwable);
-    }
-
-    public interface OnImageRequestListener {
-        void onImageRequestFinished(String imgUrl, boolean success);
     }
 
 }
