@@ -26,13 +26,13 @@ class AsyncDrawableLoaderBuilder {
 
     boolean isBuilt;
 
-    AsyncDrawableLoaderBuilder(boolean asyncRequest) {
+    AsyncDrawableLoaderBuilder(boolean shouldHandleAsync) {
 
         // @since 4.0.0
         // okay, let's add supported schemes at the start, this would be : data-uri and default network
         // we should not use file-scheme as it's a bit complicated to assume file usage (lack of permissions)
-        addSchemeHandler(DataUriSchemeHandler.create());
-        addSchemeHandler(NetworkSchemeHandler.create(asyncRequest));
+        addSchemeHandler(new DataUriSchemeHandler(shouldHandleAsync));
+        addSchemeHandler(new NetworkSchemeHandler(shouldHandleAsync));
 
         // add SVG and GIF, but only if they are present in the class-path
         if (SvgSupport.hasSvgSupport()) {

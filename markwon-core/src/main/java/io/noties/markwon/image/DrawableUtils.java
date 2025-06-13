@@ -27,6 +27,14 @@ public abstract class DrawableUtils {
         }
     }
 
+    public static void ensureBounds(@NonNull Drawable drawable){
+        final Rect bounds = drawable.getBounds();
+        //noinspection ConstantConditions
+        if (bounds == null || bounds.isEmpty()) {
+            DrawableUtils.applyIntrinsicBounds(drawable);
+        }
+    }
+
     private DrawableUtils() {
     }
 }

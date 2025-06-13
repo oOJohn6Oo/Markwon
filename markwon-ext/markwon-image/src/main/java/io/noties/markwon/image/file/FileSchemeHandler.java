@@ -59,9 +59,13 @@ public class FileSchemeHandler extends SchemeHandler {
     @Nullable
     private final AssetManager assetManager;
 
-    @SuppressWarnings("WeakerAccess")
     FileSchemeHandler(@Nullable AssetManager assetManager) {
+        this(assetManager, false);
+    }
+
+    FileSchemeHandler(@Nullable AssetManager assetManager, boolean shouldHandleAsync) {
         this.assetManager = assetManager;
+        this.shouldHandleAsync = shouldHandleAsync;
     }
 
     @NonNull
