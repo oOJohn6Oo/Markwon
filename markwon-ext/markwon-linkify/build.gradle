@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 android {
-    namespace = 'io.noties.markwon.test'
+    namespace = 'io.noties.markwon.linkify'
 
     compileSdkVersion config['compile-sdk']
 
@@ -13,12 +13,13 @@ android {
     compileOptions {
         targetCompatibility rootProject.ext.get("target_java_version")
         sourceCompatibility rootProject.ext.get("compatible_java_version")
-    }
-}
+    }}
 
 dependencies {
-
-    api  libs.x.annotations
-    api  libs.ix.java
-    api libs.junit
+    // To use LinkifyCompat
+    // note that this dependency must be added on a client side explicitly
+    compileOnly  libs.x . core
+    api project(':markwon-core')
 }
+
+registerArtifact(this)
