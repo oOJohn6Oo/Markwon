@@ -28,7 +28,7 @@ public class DataUriSchemeHandlerTest {
 
     @Before
     public void before() {
-        handler = DataUriSchemeHandler.create();
+        handler = new DataUriSchemeHandler();
     }
 
     @Test

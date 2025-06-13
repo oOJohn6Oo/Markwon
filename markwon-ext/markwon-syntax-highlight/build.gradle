@@ -18,7 +18,9 @@ android {
 dependencies {
 
     api project(':markwon-core')
-    api libs.prism4j
+    api (libs.prism4j){
+        exclude group: 'org.jetbrains', module: 'annotations-java5'
+    }
 }
 
 registerArtifact(this)

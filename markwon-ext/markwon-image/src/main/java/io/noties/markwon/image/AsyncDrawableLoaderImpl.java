@@ -11,6 +11,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.annotation.WorkerThread;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,109 +80,114 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
 
     @NonNull
     private Future<?> execute(@NonNull final AsyncDrawable asyncDrawable) {
-        return executorService.submit(new Runnable() {
-            @Override
-            public void run() {
+        return executorService.submit(() -> doLoadDrawable(asyncDrawable));
+    }
 
-                final String destination = asyncDrawable.getDestination();
+    @WorkerThread
+    private void doLoadDrawable(@NonNull final AsyncDrawable asyncDrawable){
+        final String destination = asyncDrawable.getDestination();
 
-                final Uri uri = Uri.parse(destination);
+        final Uri uri = Uri.parse(destination);
 
-                Drawable drawable = null;
+        Drawable drawable = null;
 
-                try {
+        boolean shouldMarkRequesting = false;
 
-                    final String scheme = uri.getScheme();
-                    if (scheme == null
-                            || scheme.isEmpty()) {
-                        throw new IllegalStateException("No scheme is found: " + destination);
-                    }
+        try {
 
-                    // obtain scheme handler
-                    final SchemeHandler schemeHandler = schemeHandlers.get(scheme);
-                    if(schemeHandler == null){
-                        // throw no scheme handler is available
-                        throw new IllegalStateException("No scheme-handler is found: " + destination);
-                    }
-
-                    // handle scheme
-                    ImageItem imageItem = schemeHandler.prefetch(destination, uri);
-                    if(imageItem == null){
-                        imageItem = schemeHandler.handle(destination, uri, (success) -> {
-                            if(success){
-                                // Invoke self to trigger encode
-                                load(asyncDrawable);
-                            }
-                        });
-                    }
-
-                    // if resulting imageItem needs further decoding -> proceed
-                    if (!imageItem.hasDecodingNeeded()) {
-                        drawable = imageItem.getAsWithResult().result();
-                    } else {
-                        drawable = proceedAndDecodeImage(imageItem, destination);
-                    }
-
-                } catch (Throwable t) {
-                    if (errorHandler != null) {
-                        drawable = errorHandler.handleError(destination, t);
-                    } else {
-                        // else simply log the error
-//                        Log.e("MARKWON-IMAGE", "Error loading image: " + destination, t);
-                    }
-                }
-
-                final Drawable out = drawable;
-
-                // @since 4.0.0 apply intrinsic bounds (but only if they are empty)
-                if (out != null) {
-                    final Rect bounds = out.getBounds();
-                    //noinspection ConstantConditions
-                    if (bounds == null || bounds.isEmpty()) {
-                        DrawableUtils.applyIntrinsicBounds(out);
-                    }
-                }
-
-
-                handler.postAtTime(new Runnable() {
-                    @Override
-                    public void run() {
-                        // validate that
-                        // * request was not cancelled
-                        // * out-result is present
-                        // * async-drawable is attached
-                        final Future<?> future = requests.remove(asyncDrawable);
-                        if (future != null
-                                && out != null
-                                && asyncDrawable.isAttached()) {
-                            asyncDrawable.setResult(out);
-                        }
-                    }
-                }, asyncDrawable, SystemClock.uptimeMillis());
+            final String scheme = uri.getScheme();
+            if (scheme == null
+                    || scheme.isEmpty()) {
+                throw new IllegalStateException("No scheme is found: " + destination);
             }
-        });
+
+            // obtain scheme handler
+            final SchemeHandler schemeHandler = schemeHandlers.get(scheme);
+            if(schemeHandler == null){
+                // throw no scheme handler is available
+                throw new IllegalStateException("No scheme-handler is found: " + destination);
+            }
+
+            // handle scheme
+            ImageItem imageItem = schemeHandler.prefetch(destination, uri);
+            if(imageItem == null){
+                shouldMarkRequesting = true;
+                imageItem = schemeHandler.handle(destination, uri, (item,success) -> {
+                    if(item == null) return;
+                    if(!success) return;
+                    if(!item.hasDecodingNeeded()){
+                        doLoadDrawable(asyncDrawable);
+                        return;
+                    }
+
+                    final Drawable resDrawable = proceedAndDecodeImage(item.getAsWithDecodingNeeded(), destination);
+                    if (resDrawable == null){
+                        handler.postAtTime(() -> requests.remove(asyncDrawable), asyncDrawable, SystemClock.uptimeMillis());
+                        return;
+                    }
+
+                    DrawableUtils.ensureBounds(resDrawable);
+                    handler.postAtTime(() -> {
+                        final Future<?> future = requests.remove(asyncDrawable);
+                        if (future != null && asyncDrawable.isAttached()) {
+                            asyncDrawable.setResult(resDrawable);
+                        }
+                    }, asyncDrawable, SystemClock.uptimeMillis());
+                });
+            }
+
+            // if resulting imageItem needs further decoding -> proceed
+            if (!imageItem.hasDecodingNeeded()) {
+                drawable = imageItem.getAsWithResult().result();
+            } else {
+                final ImageItem.WithDecodingNeeded withDecodingNeeded = imageItem.getAsWithDecodingNeeded();
+                drawable = withDecodingNeeded.getCachedDrawable();
+            }
+
+        } catch (Throwable t) {
+            if (errorHandler != null) {
+                drawable = errorHandler.handleError(destination, t);
+            } else {
+                // else simply log the error
+                Log.e("MARKWON-IMAGE", "Error loading image: " + destination, t);
+            }
+        }
+
+        final Drawable out = drawable;
+
+        if(out != null){
+            DrawableUtils.ensureBounds(out);
+        }
+
+        if(shouldMarkRequesting) return;
+
+        handler.postAtTime(() -> {
+            // validate that
+            // * request was not cancelled
+            // * out-result is present
+            // * async-drawable is attached
+            final Future<?> future = requests.remove(asyncDrawable);
+            if (future != null && out != null && asyncDrawable.isAttached()) {
+                asyncDrawable.setResult(out);
+            }
+        }, asyncDrawable, SystemClock.uptimeMillis());
+
     }
 
     /**
      * @throws IllegalStateException If Failed to decode
      */
-    private Drawable proceedAndDecodeImage(@NonNull ImageItem imageItem, String destination) {
-        Drawable resDrawable;
-
-        // Get in cache
-        final ImageItem.WithDecodingNeeded withDecodingNeeded = imageItem.getAsWithDecodingNeeded();
-        resDrawable = withDecodingNeeded.getCachedDrawable();
-        if (resDrawable != null) return resDrawable;
+    private Drawable proceedAndDecodeImage(@NonNull ImageItem.WithDecodingNeeded withDecodingNeeded, String destination) {
+        Drawable resDrawable = null;
 
         InputStream imgInputStream = withDecodingNeeded.inputStream();
 
-        if (imgInputStream == null){
-            throw new IllegalStateException("image still in requesting: " + destination);
-        }
-
 
         // @since 4.6.2 close input stream
-        try {
+        try (imgInputStream) {
+            if (imgInputStream == null) {
+                throw new IllegalStateException("image still in requesting: " + destination);
+            }
             MediaDecoder mediaDecoder = mediaDecoders.get(withDecodingNeeded.contentType());
 
             if (mediaDecoder == null) {
@@ -195,12 +201,8 @@ class AsyncDrawableLoaderImpl extends AsyncDrawableLoader {
                 // throw that no media decoder is found
                 throw new IllegalStateException("No media-decoder is found: " + destination);
             }
-        } finally {
-            try {
-                imgInputStream.close();
-            } catch (IOException e) {
-                Log.e("MARKWON-IMAGE", "Error closing inputStream", e);
-            }
+        } catch (IOException e) {
+            Log.e("MARKWON-IMAGE", "Error closing inputStream", e);
         }
 
         return resDrawable;

@@ -63,27 +63,54 @@ $$
 
 ## Latex style test
 
-### Using LatexParseStyle.STYLE_2_DOLLAR
+### Using LatexParseStyle.STYLE_DOLLAR
 
+```
+This is a inline $ x \in (1, 3) $ style test
 This is a inline $$ x \in (1, 3) $$ style test
+This is a inline $$$ x \in (1, 3) $$$ style test
 
 This is a block style test
+
+$
+x \in (1, 3)
+$
+
 $$
 x \in (1, 3)
 $$
-Block style test end
 
-### Using LatexParseStyle.STYLE_SLASH_DOLLAR
+$$$
+x \in (1, 3)
+$$$
 
-This is a inline \$ x \in (1, 3) \$ style test
+```
+
+Let the price be \$x, then the total cost is given by $\C = n \cdot \text{\$}x$
+
+
+This is a inline $ x \in (1, 3) $ style test
+This is a inline $$ x \in (1, 3) $$ style test
+This is a inline $$$ x \in (1, 3) $$$ style test
 
 This is a block style test
-\$
+
+$
 x \in (1, 3)
-\$
+$
+
+$$
+x \in (1, 3)
+$$
+
+$$$
+x \in (1, 3)
+$$$
+
 Block style test end
 
-### Using LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS
+
+### Using LatexParseStyle.STYLE_BRACKETS
 
 This is a inline \(x \in (1, 3) \) style test
 

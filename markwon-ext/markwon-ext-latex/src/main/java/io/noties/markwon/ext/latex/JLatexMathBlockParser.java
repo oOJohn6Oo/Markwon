@@ -35,7 +35,7 @@ class JLatexMathBlockParser extends AbstractBlockParser {
 
     JLatexMathBlockParser(int startSignCount) {
         this.startSignCount = startSignCount;
-        this.parseStyle = LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS;
+        this.parseStyle = LatexParseStyle.STYLE_BRACKETS;
     }
 
     JLatexMathBlockParser(int startSignCount, @LatexParseStyle int parseStyle) {
@@ -59,13 +59,12 @@ class JLatexMathBlockParser extends AbstractBlockParser {
         if (parserState.getIndent() < Parsing.CODE_BLOCK_INDENT) {
             int consumed;
             int signsMultiple;
-            if(this.parseStyle == LatexParseStyle.STYLE_2_DOLLAR){
+            if(this.parseStyle == LatexParseStyle.STYLE_DOLLAR){
                 signsMultiple = 1;
                 consumed = consume('$', line, nextNonSpaceIndex, length);
             }else{
                 signsMultiple = 2;
-                boolean canMatchMultiple = this.parseStyle == LatexParseStyle.STYLE_SLASH_DOLLAR;
-                consumed = consume(getSymbolByStyle(parseStyle, false), line, nextNonSpaceIndex, length, canMatchMultiple);
+                consumed = consume(getSymbolByStyle(parseStyle, false), line, nextNonSpaceIndex, length);
             }
             if (consumed == startSignCount) {
                 // okay, we have our number of signs
@@ -96,23 +95,9 @@ class JLatexMathBlockParser extends AbstractBlockParser {
      * For style 1, we could have multiple s
      * For style 2, we can only have 1 s
      */
-    static int consume(String s, @NonNull CharSequence line, int start, int end, boolean canMatchMultiple) {
+    static int consume(String s, @NonNull CharSequence line, int start, int end) {
         final int lengthS = s.length();
-        if(canMatchMultiple){
-            int matchedCount = 0;
-            for (int i = start; i < end; i++) {
-                for (int j = 0; j < lengthS && i < end; j++) {
-                    if (s.charAt(j) != line.charAt(i)) {
-                        return matchedCount;
-                    }
-                    i++;
-                }
-                matchedCount++;
-            }
-            return matchedCount;
-        }
-
-        if(line.length() >= s.length()){
+        if(line.length() >= lengthS){
             for (int i = 0; i < lengthS; i++){
                 if (s.charAt(i) != line.charAt(i)){
                     return 0;
@@ -135,15 +120,11 @@ class JLatexMathBlockParser extends AbstractBlockParser {
     }
 
     static String getSymbolByStyle(int style, boolean start) {
-        switch (style) {
-            case LatexParseStyle.STYLE_2_DOLLAR:
-                return "$$";
-            case LatexParseStyle.STYLE_SLASH_DOLLAR:
-                return "\\$";
-            default:
-                if(start) return "\\[";
-                else return "\\]";
+        if (style == LatexParseStyle.STYLE_DOLLAR) {
+            return "$";
         }
+        if (start) return "\\[";
+        else return "\\]";
     }
 
 }

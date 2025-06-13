@@ -13,7 +13,7 @@ Compare to the original repo:
 - [x] Edge-to-Edge support for Demo APP
 - [x] Back press animation support
 
-[DemoAPK](https://github.com/user-attachments/files/20714581/markwon-release.apk.md)
+[DemoAPK](https://github.com/user-attachments/files/20731714/markwon-release.apk.md)
 
 ---
 

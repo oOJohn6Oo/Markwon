@@ -332,9 +332,9 @@ public class JLatexMathPlugin extends AbstractMarkwonPlugin {
         private ExecutorService executorService;
 
         @LatexParseStyle
-        private int inlineStyle = LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS;
+        private int inlineStyle = LatexParseStyle.STYLE_BRACKETS;
         @LatexParseStyle
-        private int blockStyle = LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS;
+        private int blockStyle = LatexParseStyle.STYLE_BRACKETS;
 
         Builder(@NonNull JLatexMathTheme.Builder builder) {
             this.theme = builder;
