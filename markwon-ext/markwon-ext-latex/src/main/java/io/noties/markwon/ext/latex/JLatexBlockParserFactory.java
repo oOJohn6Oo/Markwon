@@ -15,7 +15,7 @@ public class JLatexBlockParserFactory extends AbstractBlockParserFactory {
     private final int parseStyle;
 
     public JLatexBlockParserFactory() {
-        this.parseStyle = LatexParseStyle.STYLE_SLASH_SQUARE_BRACKETS;
+        this(LatexParseStyle.STYLE_BRACKETS);
     }
 
     public JLatexBlockParserFactory(int parseStyle) {
@@ -45,17 +45,12 @@ public class JLatexBlockParserFactory extends AbstractBlockParserFactory {
 
         int signs;
         int signsMultiple;
-        if (parseStyle == LatexParseStyle.STYLE_2_DOLLAR) {
+        if (parseStyle == LatexParseStyle.STYLE_DOLLAR) {
             signsMultiple = 1;
             signs = consume('$', line, nextNonSpaceIndex, length);
-            // 2 is minimum
-            if (signs < 2) {
-                return BlockStart.none();
-            }
         }else{
             signsMultiple = 2;
-            boolean canMatchMultiple = parseStyle == LatexParseStyle.STYLE_SLASH_DOLLAR;
-            signs = consume(getSymbolByStyle(parseStyle, true), line, nextNonSpaceIndex, length, canMatchMultiple);
+            signs = consume(getSymbolByStyle(parseStyle, true), line, nextNonSpaceIndex, length);
         }
 
         // consume spaces until the end of the line, if any other content is found -> NONE
