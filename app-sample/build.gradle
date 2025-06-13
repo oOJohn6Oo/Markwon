@@ -14,7 +14,7 @@ def gitSha = { ->
 
 android {
 
-    namespace "io.noties.markwon.app"
+    namespace = "io.noties.markwon.app"
 
     compileSdkVersion config['compile-sdk']
 
@@ -27,21 +27,19 @@ android {
 
         resConfig 'en'
 
-        setProperty("archivesBaseName", "markwon")
+        base.archivesName = "markwon"
 
         buildConfigField 'String', 'GIT_SHA', "\"${gitSha()}\""
         buildConfigField 'String', 'GIT_REPOSITORY', '"https://github.com/noties/Markwon"'
 
         final def scheme = 'markwon'
         buildConfigField 'String', 'DEEPLINK_SCHEME', "\"$scheme\""
-        manifestPlaceholders += [
-                'deeplink_scheme': scheme
-        ]
+        manifestPlaceholders += ['deeplink_scheme': scheme]
     }
 
     compileOptions {
-        targetCompatibility rootProject.ext.get("target_java_version")
-        sourceCompatibility rootProject.ext.get("compatible_java_version")
+        targetCompatibility = rootProject.ext.get("target_java_version")
+        sourceCompatibility = rootProject.ext.get("compatible_java_version")
     }
 
     kotlinOptions {
@@ -59,14 +57,14 @@ android {
 
         buildTypes {
             release {
-                signingConfig signingConfigs.debug
+                signingConfig = signingConfigs.debug
             }
         }
     }
 
     buildFeatures {
-        buildConfig true
-        viewBinding true
+        buildConfig = true
+        viewBinding = true
     }
 }
 
@@ -76,32 +74,28 @@ kapt {
     }
 }
 
-configurations.configureEach {
-    exclude group: 'org.jetbrains', module: 'annotations-java5'
-}
-
 dependencies {
     kapt project(':sample-utils:processor')
     kapt libs.prism4j.bundler
 
     implementation project(':markwon-core')
-    implementation project(':markwon-editor')
-    implementation project(':markwon-ext-latex')
-    implementation project(':markwon-ext-strikethrough')
-    implementation project(':markwon-ext-tables')
-    implementation project(':markwon-ext-tasklist')
-    implementation project(':markwon-html')
-    implementation project(':markwon-image')
-    implementation project(':markwon-inline-parser')
-    implementation project(':markwon-linkify')
-    implementation project(':markwon-recycler')
-    implementation project(':markwon-recycler-table')
-    implementation project(':markwon-simple-ext')
-    implementation project(':markwon-syntax-highlight')
+    implementation project(':markwon-ext:markwon-editor')
+    implementation project(':markwon-ext:markwon-ext-latex')
+    implementation project(':markwon-ext:markwon-ext-strikethrough')
+    implementation project(':markwon-ext:markwon-ext-tables')
+    implementation project(':markwon-ext:markwon-ext-tasklist')
+    implementation project(':markwon-ext:markwon-html')
+    implementation project(':markwon-ext:markwon-image')
+    implementation project(':markwon-ext:markwon-inline-parser')
+    implementation project(':markwon-ext:markwon-linkify')
+    implementation project(':markwon-ext:markwon-recycler')
+    implementation project(':markwon-ext:markwon-recycler-table')
+    implementation project(':markwon-ext:markwon-simple-ext')
+    implementation project(':markwon-ext:markwon-syntax-highlight')
 
-    implementation project(':markwon-image-picasso')
-    implementation project(':markwon-image-glide')
-    implementation project(':markwon-image-coil')
+    implementation project(':markwon-ext:markwon-image-picasso')
+    implementation project(':markwon-ext:markwon-image-glide')
+    implementation project(':markwon-ext:markwon-image-coil')
 
 //        implementation libs.x.appcompat
     implementation libs.x.recyclerview

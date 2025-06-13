@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace = 'io.noties.markwon.image'
 
-    namespace = 'io.noties.markwon'
     compileSdkVersion config['compile-sdk']
 
     defaultConfig {
@@ -17,17 +17,14 @@ android {
 
 dependencies {
 
-    api libs.x.annotations
-    api libs.commonmark
+    api project(':markwon-core')
 
-    // @since 4.1.0 to allow PrecomputedTextSetterCompat
-    // note that this dependency must be added on a client side explicitly
-    compileOnly libs.x.core
-    compileOnly libs.x.appcompat
-
-    testImplementation project(':markwon-test-span')
+    compileOnly  libs.android.gif.impl
+    compileOnly  libs.android.svg
+    compileOnly libs.okhttp
     testImplementation libs.commons.io
 
+    testImplementation project(':markwon-test-span')
     testImplementation libs.junit
     testImplementation libs.robolectric
     testImplementation libs.mockito

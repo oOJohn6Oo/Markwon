@@ -37,11 +37,6 @@ tasks.register('clean', Delete) {
     delete rootProject.layout.buildDirectory
 }
 
-wrapper {
-    gradleVersion '8.14.1'
-    distributionType 'all'
-}
-
 if (hasProperty('local')) {
     if (!hasProperty('LOCAL_MAVEN_URL')) {
         throw new RuntimeException('Cannot publish to local maven as no such property exists: LOCAL_MAVEN_URL')
@@ -87,7 +82,7 @@ def registerArtifact(project) {
         project.android.testOptions.unitTests.all {
             testLogging {
                 events "passed", "skipped", "failed"
-                exceptionFormat "short"
+                exceptionFormat = "short"
                 showStandardStreams = true
             }
         }

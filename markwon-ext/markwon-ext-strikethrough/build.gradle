@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace = 'io.noties.markwon.ext.strikethrough'
 
-    namespace = 'io.noties.markwon'
     compileSdkVersion config['compile-sdk']
 
     defaultConfig {
@@ -17,20 +17,16 @@ android {
 
 dependencies {
 
-    api libs.x.annotations
-    api libs.commonmark
+    api project(':markwon-core')
 
-    // @since 4.1.0 to allow PrecomputedTextSetterCompat
-    // note that this dependency must be added on a client side explicitly
-    compileOnly libs.x.core
-    compileOnly libs.x.appcompat
+    api libs.commonmark.strikethrough
 
+    // NB! ix-java dependency to be used in tests
+    testImplementation libs.ix.java
     testImplementation project(':markwon-test-span')
-    testImplementation libs.commons.io
-
     testImplementation libs.junit
-    testImplementation libs.robolectric
     testImplementation libs.mockito
+    testImplementation libs.robolectric
 }
 
 registerArtifact(this)

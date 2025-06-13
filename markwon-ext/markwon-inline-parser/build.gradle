@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 android {
-    namespace = 'io.noties.markwon.test'
+    namespace = 'io.noties.markwon.inlineparser'
 
     compileSdkVersion config['compile-sdk']
 
@@ -13,12 +13,15 @@ android {
     compileOptions {
         targetCompatibility rootProject.ext.get("target_java_version")
         sourceCompatibility rootProject.ext.get("compatible_java_version")
-    }
-}
+    }}
 
 dependencies {
+    api project(':markwon-core')
+    api libs.x.annotations
+    api libs.commonmark
 
-    api  libs.x.annotations
-    api  libs.ix.java
-    api libs.junit
+    testImplementation libs.junit
+    testImplementation  libs.commonmark.test.util
 }
+
+registerArtifact(this)
