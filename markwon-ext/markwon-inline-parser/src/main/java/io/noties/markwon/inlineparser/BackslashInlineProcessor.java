@@ -24,8 +24,7 @@ public class BackslashInlineProcessor extends InlineProcessor {
         char nextChar = peek();
 
         if(nextChar == '(' || nextChar == ')'
-        || nextChar == '[' || nextChar == ']'
-        || nextChar == '$')
+        || nextChar == '[' || nextChar == ']')
             return null;
 
         if (nextChar == '\n') {

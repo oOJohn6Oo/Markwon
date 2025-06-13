@@ -88,6 +88,8 @@ public class AsyncDrawableSpan extends ReplacementSpan {
         return size;
     }
 
+    int heightDiff = 0;
+    int transY = 0;
     @Override
     public void draw(
             @NonNull Canvas canvas,
@@ -110,19 +112,18 @@ public class AsyncDrawableSpan extends ReplacementSpan {
 
         if (drawable.hasResult()) {
 
-            final int b = bottom - drawable.getBounds().bottom;
+            heightDiff = (bottom - top) - drawable.getBounds().height();
 
             final int save = canvas.save();
             try {
-                final int translationY;
                 if (ALIGN_CENTER == alignment) {
-                    translationY = b - ((bottom - top - drawable.getBounds().height()) / 2);
+                    transY = top + heightDiff / 2;
                 } else if (ALIGN_BASELINE == alignment) {
-                    translationY = b - paint.getFontMetricsInt().descent;
+                    transY =  top + heightDiff / 2 - paint.getFontMetricsInt().descent;
                 } else {
-                    translationY = b;
+                    transY = top;
                 }
-                canvas.translate(x, translationY);
+                canvas.translate(x, transY);
                 drawable.draw(canvas);
             } finally {
                 canvas.restoreToCount(save);
