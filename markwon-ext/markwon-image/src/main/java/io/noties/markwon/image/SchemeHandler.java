@@ -12,6 +12,8 @@ import java.util.Collection;
  */
 public abstract class SchemeHandler {
 
+    protected boolean shouldHandleAsync = false;
+
     /**
      * Changes since 4.0.0:
      * <ul>

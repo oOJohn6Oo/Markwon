@@ -27,41 +27,38 @@ public class OkHttpNetworkSchemeHandler extends SchemeHandler {
 
     private final HashMap<String, ImageItem.WithDecodingNeeded> imgPathMap = new HashMap<>();
 
-    @NonNull
-    public static OkHttpNetworkSchemeHandler create() {
-        return create(false, new OkHttpClient());
-    }
-
-    @NonNull
-    public static OkHttpNetworkSchemeHandler create(boolean asyncRequest, @NonNull OkHttpClient client) {
-        // explicit cast, otherwise a recursive call
-        return create(asyncRequest,(Call.Factory) client);
-    }
-
-    /**
-     * @since 4.0.0
-     */
-    @NonNull
-    public static OkHttpNetworkSchemeHandler create(boolean asyncRequest, @NonNull Call.Factory factory) {
-        return new OkHttpNetworkSchemeHandler(asyncRequest, factory);
-    }
-
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
 
     // @since 4.0.0, previously just OkHttpClient
     private final Call.Factory factory;
-    private final boolean asyncRequest;
 
-    @SuppressWarnings("WeakerAccess")
-    OkHttpNetworkSchemeHandler(boolean asyncRequest, @NonNull Call.Factory factory) {
-        this.asyncRequest = asyncRequest;
+    public OkHttpNetworkSchemeHandler(){
+        this(false, new OkHttpClient());
+    }
+
+    public OkHttpNetworkSchemeHandler(boolean shouldHandleAsync){
+        this(shouldHandleAsync, new OkHttpClient());
+    }
+
+
+    public <T extends Call.Factory> OkHttpNetworkSchemeHandler(@NonNull T factory){
+        this(false, factory);
+    }
+
+    public <T extends Call.Factory> OkHttpNetworkSchemeHandler(boolean shouldHandleAsync, @NonNull T factory) {
+        this.shouldHandleAsync = shouldHandleAsync;
         this.factory = factory;
+    }
+
+    @Override
+    public ImageItem prefetch(@NonNull String imgUrl, @NonNull Uri uri) {
+        return imgPathMap.get(imgUrl);
     }
 
     @NonNull
     @Override
     public ImageItem handle(@NonNull String raw, @NonNull Uri uri,@Nullable ImageLoadedNotifier notifier) {
-        if(asyncRequest){
+        if(shouldHandleAsync){
             return doAsyncRequest(raw, notifier);
         }else{
             return doSyncRequest(raw);
@@ -89,7 +86,7 @@ public class OkHttpNetworkSchemeHandler extends SchemeHandler {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 tempItem.setIsProcessing(false);
                 if (notifier != null) {
-                    notifier.doNotifyUI(false);
+                    notifier.doNotifyUI(tempItem, false);
                 }
             }
 
@@ -109,7 +106,7 @@ public class OkHttpNetworkSchemeHandler extends SchemeHandler {
                     tempItem.setIsProcessing(false);
                 }
                 if (notifier != null) {
-                    notifier.doNotifyUI(tempItem.inputStream() != null);
+                    notifier.doNotifyUI(tempItem, tempItem.inputStream() != null);
                 }
             }
         });

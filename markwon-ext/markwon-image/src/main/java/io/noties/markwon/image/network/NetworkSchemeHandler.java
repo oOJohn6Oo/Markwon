@@ -27,7 +27,6 @@ import io.noties.markwon.image.SchemeHandler;
 /**
  * A simple network scheme handler that is not dependent on any external libraries.
  *
- * @see #create()
  * @since 3.0.0
  */
 public class NetworkSchemeHandler extends SchemeHandler {
@@ -35,24 +34,16 @@ public class NetworkSchemeHandler extends SchemeHandler {
     public static final String SCHEME_HTTP = "http";
     public static final String SCHEME_HTTPS = "https";
 
-    private final boolean asyncRequest;
-
     private final ConcurrentHashMap<String, WithDecodingNeeded> cachedImageItems = new ConcurrentHashMap<>();
 
     private final ExecutorService requestExecutor = Executors.newFixedThreadPool(12);
 
-    @NonNull
-    public static NetworkSchemeHandler create() {
-        return new NetworkSchemeHandler(false);
+    public NetworkSchemeHandler() {
+        this(false);
     }
 
-    @NonNull
-    public static NetworkSchemeHandler create(boolean asyncRequest) {
-        return new NetworkSchemeHandler(asyncRequest);
-    }
-
-    NetworkSchemeHandler(boolean asyncRequest) {
-        this.asyncRequest = asyncRequest;
+    public NetworkSchemeHandler(boolean shouldHandleAsync) {
+        this.shouldHandleAsync = shouldHandleAsync;
     }
 
     @Override
@@ -63,12 +54,11 @@ public class NetworkSchemeHandler extends SchemeHandler {
     @NonNull
     @Override
     public ImageItem handle(@NonNull String raw, @NonNull Uri uri, @Nullable ImageLoadedNotifier notifier) {
-        if (asyncRequest) {
+        if (shouldHandleAsync) {
             return onAsyncRequestImage(raw, notifier);
         }
         return onSyncRequestImage(raw);
     }
-
 
     private WithDecodingNeeded onSyncRequestImage(@NonNull String imgUrl){
 
@@ -110,7 +100,7 @@ public class NetworkSchemeHandler extends SchemeHandler {
     }
 
     private void doAsyncRequest(@NonNull String imgUrl, WithDecodingNeeded imageItem, @Nullable ImageLoadedNotifier notifier) {
-        boolean result = false;
+        ImageItem.WithDecodingNeeded resItem = null;
         try {
             final URL url = new URL(imgUrl);
             final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -120,8 +110,8 @@ public class NetworkSchemeHandler extends SchemeHandler {
             if (responseCode >= 200 && responseCode < 300) {
                 final String contentType = contentType(connection.getHeaderField("Content-Type"));
                 final InputStream inputStream = new BufferedInputStream(connection.getInputStream());
-                cachedImageItems.put(imgUrl, ImageItem.withDecodingNeeded(contentType, inputStream));
-                result = true;
+                resItem = ImageItem.withDecodingNeeded(contentType, inputStream);
+                cachedImageItems.put(imgUrl, resItem);
             } else {
                 imageItem.setIsProcessing(false);
 //                throw new IOException("Bad response code: " + responseCode + ", url: " + imgUrl);
@@ -132,7 +122,7 @@ public class NetworkSchemeHandler extends SchemeHandler {
 //            throw new IllegalStateException("Exception obtaining network resource: " + imgUrl, e);
         } finally {
             if (notifier != null) {
-                notifier.doNotifyUI(result);
+                notifier.doNotifyUI(resItem, resItem != null);
             }
         }
     }

@@ -46,7 +46,7 @@ public class ImagesCustomSchemeSample extends MarkwonTextViewSample {
 
             // it's a sample only, most likely you won't need to
             // use existing scheme-handler, this for demonstration purposes only
-            final NetworkSchemeHandler handler = NetworkSchemeHandler.create();
+            final NetworkSchemeHandler handler = new NetworkSchemeHandler();
 
             @NonNull
             @Override

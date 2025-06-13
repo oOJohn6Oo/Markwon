@@ -20,20 +20,23 @@ public class DataUriSchemeHandler extends SchemeHandler {
 
     public static final String SCHEME = "data";
 
-    @NonNull
-    public static DataUriSchemeHandler create() {
-        return new DataUriSchemeHandler(DataUriParser.create(), DataUriDecoder.create());
-    }
-
     private static final String START = "data:";
 
     private final DataUriParser uriParser;
     private final DataUriDecoder uriDecoder;
 
-    @SuppressWarnings("WeakerAccess")
-    DataUriSchemeHandler(@NonNull DataUriParser uriParser, @NonNull DataUriDecoder uriDecoder) {
+    public DataUriSchemeHandler() {
+        this(DataUriParser.create(), DataUriDecoder.create(), false);
+    }
+
+    public DataUriSchemeHandler(boolean shouldHandleAsync) {
+        this(DataUriParser.create(), DataUriDecoder.create(), shouldHandleAsync);
+    }
+
+    private DataUriSchemeHandler(@NonNull DataUriParser uriParser, @NonNull DataUriDecoder uriDecoder, boolean shouldHandleAsync) {
         this.uriParser = uriParser;
         this.uriDecoder = uriDecoder;
+        this.shouldHandleAsync = shouldHandleAsync;
     }
 
     @NonNull
