@@ -84,7 +84,7 @@ class SseLatexSample : MarkwonSample() {
             .usePlugin(JLatexMathPlugin.create(mBinding.textView.textSize) { builder ->
                 builder.inlinesEnabled(true)
                     .blockStyle(LatexParseStyle.STYLE_DOLLAR)
-                    .inlineStyle(LatexParseStyle.STYLE_DOLLAR)
+                    .inlineStyle(LatexParseStyle.STYLE_BRACKETS)
             })
             .usePlugin(ReadMeImageDestinationPlugin(null))
             .usePlugin(object : AbstractMarkwonPlugin() {
