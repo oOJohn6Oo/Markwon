@@ -21,7 +21,7 @@ class JLatexMathInlineProcessor extends InlineProcessor {
     }
 //    private static final Pattern RE4StyleDollar = Pattern.compile("(\\${2})(.+?)\\1");
     private static final Pattern RE4StyleDollar = Pattern.compile("(?<!\\\\)(\\$+)(.+?)(?<!\\\\)\\1");
-    private static final Pattern RE4StyleBracket = Pattern.compile("\\\\\\(([\\s\\S]+?)\\\\\\)");
+    private static final Pattern RE4StyleBracket = Pattern.compile("\\\\\\(([\\s\\S]+?)\\\\\\)|\\\\\\[([\\s\\S]+?)\\\\\\]");
 
     @Override
     public char specialCharacter() {
