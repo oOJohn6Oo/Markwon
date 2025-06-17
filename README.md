@@ -5,7 +5,7 @@ Compare to the original repo:
 
 - [ ] Upgrade commonmark
 - [ ] Make an aar and publish it
-- [ ] Re-packaging the `prism4j.bundler` to avoid the compile warning due to JAVA version compatible issue
+- [x] Re-packaging the `prism4j.bundler` to avoid the compile warning due to JAVA version compatible issue
 - [x] fix Latex and Image blink issue
 - [x] Support background Image request
 - [x] Upgraded to the latest AGP version
