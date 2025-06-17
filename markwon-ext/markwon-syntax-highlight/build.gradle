@@ -11,16 +11,14 @@ android {
     }
 
     compileOptions {
-        targetCompatibility rootProject.ext.get("target_java_version")
-        sourceCompatibility rootProject.ext.get("compatible_java_version")
+        targetCompatibility = rootProject.ext.get("target_java_version")
+        sourceCompatibility = rootProject.ext.get("compatible_java_version")
     }}
 
 dependencies {
 
     api project(':markwon-core')
-    api (libs.prism4j){
-        exclude group: 'org.jetbrains', module: 'annotations-java5'
-    }
+    api (libs.prism4j)
 }
 
 registerArtifact(this)
