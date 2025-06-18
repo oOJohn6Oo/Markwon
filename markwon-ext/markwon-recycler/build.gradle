@@ -22,4 +22,4 @@ dependencies {
     api libs.x.recyclerview
 }
 
-registerArtifact(this)
+// registerArtifact(this)

@@ -3,15 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 
-def gitSha = { ->
-    def output = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'rev-parse', '--short', 'HEAD'
-        standardOutput = output
-    }
-    return output.toString().trim()
-}.memoize()
-
 android {
 
     namespace = "io.noties.markwon.app"
@@ -29,7 +20,7 @@ android {
 
         base.archivesName = "markwon"
 
-        buildConfigField 'String', 'GIT_SHA', "\"${gitSha()}\""
+        buildConfigField 'String', 'GIT_SHA', "\"t1e2s3t4\""
         buildConfigField 'String', 'GIT_REPOSITORY', '"https://github.com/noties/Markwon"'
 
         final def scheme = 'markwon'

@@ -20,4 +20,4 @@ dependencies {
     api  libs.glide
 }
 
-registerArtifact(this)
+// registerArtifact(this)

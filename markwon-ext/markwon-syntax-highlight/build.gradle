@@ -21,4 +21,4 @@ dependencies {
     api (libs.prism4j)
 }
 
-registerArtifact(this)
+// registerArtifact(this)

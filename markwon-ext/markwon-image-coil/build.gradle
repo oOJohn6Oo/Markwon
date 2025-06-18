@@ -24,4 +24,4 @@ dependencies {
     compileOnly  libs.coil
 }
 
-registerArtifact(this)
+// registerArtifact(this)

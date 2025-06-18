@@ -22,4 +22,4 @@ dependencies {
     api project(':markwon-core')
 }
 
-registerArtifact(this)
+// registerArtifact(this)

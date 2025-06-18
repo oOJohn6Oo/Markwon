@@ -21,4 +21,4 @@ dependencies {
     api libs.commonmark.table
 }
 
-registerArtifact(this)
+// registerArtifact(this)

@@ -24,4 +24,4 @@ dependencies {
     testImplementation libs.mockito
 }
 
-registerArtifact(this)
+// registerArtifact(this)

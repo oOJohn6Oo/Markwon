@@ -1,48 +1,20 @@
 buildscript {
-    ext.kotlin_version = '2.1.21'
+    ext.agp_version = "8.10.1"
+    ext.kotlin_version = "2.1.21"
     ext.compatible_java_version = JavaVersion.VERSION_11
     ext.target_java_version = JavaVersion.VERSION_17
     ext.target_java_version_for_kotlin = "17"
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.10.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
 }
 
-allprojects {
-    repositories {
-        if (project.hasProperty('LOCAL_MAVEN_URL')) {
-            maven { url LOCAL_MAVEN_URL }
-        }
-        google()
-        mavenCentral()
-    }
-    version = VERSION_NAME
-    group = GROUP
-
-    // do we actually need javadoc any more?
-    tasks.withType(Javadoc).tap {
-        configureEach {
-            enabled = false
-        }
-    }
+plugins{
+    id("com.android.application") version("${agp_version}") apply(false)
+    id("com.android.library") version("${agp_version}") apply(false)
+    id("org.jetbrains.kotlin.jvm") version("${kotlin_version}") apply(false)
+    id("com.vanniktech.maven.publish") version("0.32.0") apply(false)
 }
 
 tasks.register('clean', Delete) {
     delete rootProject.layout.buildDirectory
-}
-
-if (hasProperty('local')) {
-    if (!hasProperty('LOCAL_MAVEN_URL')) {
-        throw new RuntimeException('Cannot publish to local maven as no such property exists: LOCAL_MAVEN_URL')
-    }
-    ext.RELEASE_REPOSITORY_URL = LOCAL_MAVEN_URL
-    ext.SNAPSHOT_REPOSITORY_URL = LOCAL_MAVEN_URL
 }
 
 ext {
@@ -51,40 +23,5 @@ ext {
             'compile-sdk'    : 36,
             'target-sdk'     : 36,
             'min-sdk'        : 16,
-            'push-aar-gradle': 'https://raw.githubusercontent.com/noties/gradle-mvn-push/master/gradle-mvn-push-aar.gradle'
     ]
-
-    registerArtifact = this.&registerArtifact
-}
-
-tasks.register('checkUpdates') {
-    apply plugin: 'com.github.ben-manes.versions'
-    dependsOn 'dependencyUpdates'
-}
-
-def registerArtifact(project) {
-
-    if (hasProperty('release')) {
-
-        // to be used in github actions (to publish a snapshot)
-        // but only if we have snapshot in the version name
-        if (hasProperty('CI') && VERSION_NAME.contains('SNAPSHOT')) {
-            ext.NEXUS_USERNAME = System.getenv('NEXUS_USERNAME')
-            ext.NEXUS_PASSWORD = System.getenv('NEXUS_PASSWORD')
-        }
-
-        project.apply from: config['push-aar-gradle']
-    }
-
-    project.afterEvaluate {
-
-        // print test status (for CI)
-        project.android.testOptions.unitTests.all {
-            testLogging {
-                events "passed", "skipped", "failed"
-                exceptionFormat = "short"
-                showStandardStreams = true
-            }
-        }
-    }
 }

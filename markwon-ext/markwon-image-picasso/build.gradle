@@ -20,4 +20,4 @@ dependencies {
     api  libs.picasso
 }
 
-registerArtifact(this)
+// registerArtifact(this)

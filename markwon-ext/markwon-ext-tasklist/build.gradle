@@ -25,4 +25,4 @@ dependencies {
     testImplementation libs.robolectric
 }
 
-registerArtifact(this)
+// registerArtifact(this)

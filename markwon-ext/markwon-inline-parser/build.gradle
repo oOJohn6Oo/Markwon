@@ -24,4 +24,4 @@ dependencies {
     testImplementation  libs.commonmark.test.util
 }
 
-registerArtifact(this)
+// registerArtifact(this)
