@@ -43,18 +43,25 @@ class SimpleExtDelimiterProcessor implements DelimiterProcessor {
         return length;
     }
 
+//    @Override
+//    public int getDelimiterUse(DelimiterRun opener, DelimiterRun closer) {
+//        if (opener.length() >= length && closer.length() >= length) {
+//            return length;
+//        }
+//        return 0;
+//    }
+
     @Override
-    public int getDelimiterUse(DelimiterRun opener, DelimiterRun closer) {
-        if (opener.length() >= length && closer.length() >= length) {
-            return length;
+    public int process(DelimiterRun openingRun, DelimiterRun closingRun) {
+
+        if (openingRun.length() < length || closingRun.length() < length) {
+            return 0;
         }
-        return 0;
-    }
-
-    @Override
-    public void process(Text opener, Text closer, int delimiterUse) {
-
         final Node node = new SimpleExtNode(spanFactory);
+        final Text opener = openingRun.getOpener();
+        final Text closer = openingRun.getCloser();
+
+        int count = 0;
 
         Node tmp = opener.getNext();
         Node next;
@@ -63,8 +70,27 @@ class SimpleExtDelimiterProcessor implements DelimiterProcessor {
             next = tmp.getNext();
             node.appendChild(tmp);
             tmp = next;
+            count++;
         }
 
         opener.insertAfter(node);
+        return count;
     }
+
+//    @Override
+//    public void process(Text opener, Text closer, int delimiterUse) {
+//
+//        final Node node = new SimpleExtNode(spanFactory);
+//
+//        Node tmp = opener.getNext();
+//        Node next;
+//
+//        while (tmp != null && tmp != closer) {
+//            next = tmp.getNext();
+//            node.appendChild(tmp);
+//            tmp = next;
+//        }
+//
+//        opener.insertAfter(node);
+//    }
 }

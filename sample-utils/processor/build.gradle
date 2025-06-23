@@ -12,5 +12,4 @@ sourceSets {
 dependencies {
     implementation libs.x.annotations
     implementation libs.gson
-    implementation libs.commons.io
 }

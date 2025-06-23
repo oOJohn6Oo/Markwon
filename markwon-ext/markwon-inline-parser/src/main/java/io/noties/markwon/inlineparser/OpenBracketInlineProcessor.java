@@ -3,6 +3,7 @@ package io.noties.markwon.inlineparser;
 import org.commonmark.internal.Bracket;
 import org.commonmark.node.Node;
 import org.commonmark.node.Text;
+import org.commonmark.parser.beta.Position;
 
 /**
  * Parses markdown links {@code [link](#href)}

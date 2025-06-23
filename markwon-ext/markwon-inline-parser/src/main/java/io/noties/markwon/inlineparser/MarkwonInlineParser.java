@@ -15,6 +15,7 @@ import org.commonmark.node.Text;
 import org.commonmark.parser.InlineParser;
 import org.commonmark.parser.InlineParserContext;
 import org.commonmark.parser.InlineParserFactory;
+import org.commonmark.parser.SourceLines;
 import org.commonmark.parser.delimiter.DelimiterProcessor;
 
 import java.util.ArrayList;
@@ -217,28 +218,52 @@ public class MarkwonInlineParser implements InlineParser, MarkwonInlineParserCon
         }
     }
 
+
     /**
      * Parse content in block into inline children, using reference map to resolve references.
      */
     @Override
-    public void parse(String content, Node block) {
-        reset(content.trim());
+    public void parse(SourceLines lines, Node node) {
+        reset(lines.getContent().trim());
 
         // we still reference it
-        this.block = block;
+        this.block = node;
 
         while (true) {
-            Node node = parseInline();
-            if (node != null) {
-                block.appendChild(node);
+            Node inlineNode = parseInline();
+            if (inlineNode != null) {
+                node.appendChild(inlineNode);
             } else {
                 break;
             }
         }
 
         processDelimiters(null);
-        mergeChildTextNodes(block);
+        mergeChildTextNodes(node);
     }
+
+    /**
+     * Parse content in block into inline children, using reference map to resolve references.
+     */
+//    @Override
+//    public void parse(String content, Node block) {
+//        reset(content.trim());
+//
+//        // we still reference it
+//        this.block = block;
+//
+//        while (true) {
+//            Node node = parseInline();
+//            if (node != null) {
+//                block.appendChild(node);
+//            } else {
+//                break;
+//            }
+//        }
+//
+//        processDelimiters(null);
+//        mergeChildTextNodes(block);
+//    }
 
     private void reset(String content) {
         this.input = content;
@@ -821,6 +846,7 @@ public class MarkwonInlineParser implements InlineParser, MarkwonInlineParserCon
             } else {
                 delimiterProcessors = this.delimiterProcessors;
             }
+            
             return new MarkwonInlineParser(
                     inlineParserContext,
                     referencesEnabled,

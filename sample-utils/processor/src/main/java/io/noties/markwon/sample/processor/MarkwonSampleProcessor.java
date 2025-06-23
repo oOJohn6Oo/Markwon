@@ -6,14 +6,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -140,7 +139,7 @@ public class MarkwonSampleProcessor extends AbstractProcessor {
         }
 
         try (
-                InputStream inputStream = FileUtils.openInputStream(file);
+                InputStream inputStream = Files.newInputStream(file.toPath());
                 Reader reader = new InputStreamReader(inputStream)
         ) {
 
@@ -179,7 +178,7 @@ public class MarkwonSampleProcessor extends AbstractProcessor {
                 .create()
                 .toJson(samples);
 
-        FileUtils.write(file, json, StandardCharsets.UTF_8);
+        Files.writeString(file.toPath(), json, StandardCharsets.UTF_8);
     }
 
     @NonNull

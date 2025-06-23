@@ -63,13 +63,18 @@ class StaggeredDelimiterProcessor implements DelimiterProcessor {
         return processors.getFirst();
     }
 
-    @Override
-    public int getDelimiterUse(DelimiterRun opener, DelimiterRun closer) {
-        return findProcessor(opener.length()).getDelimiterUse(opener, closer);
-    }
+//    @Override
+//    public int getDelimiterUse(DelimiterRun opener, DelimiterRun closer) {
+//        return findProcessor(opener.length()).getDelimiterUse(opener, closer);
+//    }
 
     @Override
-    public void process(Text opener, Text closer, int delimiterUse) {
-        findProcessor(delimiterUse).process(opener, closer, delimiterUse);
+    public int process(DelimiterRun openingRun, DelimiterRun closingRun) {
+        return findProcessor(openingRun.length()).process(openingRun, closingRun);
     }
+
+//    @Override
+//    public void process(Text opener, Text closer, int delimiterUse) {
+//        findProcessor(delimiterUse).process(opener, closer, delimiterUse);
+//    }
 }

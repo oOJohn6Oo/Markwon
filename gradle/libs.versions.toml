@@ -1,5 +1,5 @@
 [versions]
-commonmark = "0.13.0"       # $commonMarkVersion
+commonmark = "0.24.0"       # $commonMarkVersion
 dagger = "2.56.2"           # $daggerVersion
 coil = "2.7.0"              # $coilVersion
 junit = "4.13.2"
@@ -26,9 +26,9 @@ x-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
 x-cardview = { module = "androidx.cardview:cardview", version = "1.0.0" }
 x-fragment = { module = "androidx.fragment:fragment", version = "1.8.8" }
 
-commonmark = { module = "com.atlassian.commonmark:commonmark", version.ref = "commonmark" }
-commonmark-strikethrough = { module = "com.atlassian.commonmark:commonmark-ext-gfm-strikethrough", version.ref = "commonmark" }
-commonmark-table = { module = "com.atlassian.commonmark:commonmark-ext-gfm-tables", version.ref = "commonmark" }
+commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
+commonmark-strikethrough = { module = "org.commonmark:commonmark-ext-gfm-strikethrough", version.ref = "commonmark" }
+commonmark-table = { module = "org.commonmark:commonmark-ext-gfm-tables", version.ref = "commonmark" }
 
 android-svg = { module = "com.caverock:androidsvg", version.ref = "androidsvg" }
 android-gif-impl = { module = "pl.droidsonroids.gif:android-gif-drawable", version.ref = "androidgif" }

@@ -3,6 +3,7 @@ package io.noties.markwon.inlineparser;
 import org.commonmark.internal.util.Parsing;
 import org.commonmark.node.Code;
 import org.commonmark.node.Node;
+import org.commonmark.text.Characters;
 
 import java.util.regex.Pattern;
 
@@ -41,7 +42,7 @@ public class BackticksInlineProcessor extends InlineProcessor {
                 if (content.length() >= 3 &&
                         content.charAt(0) == ' ' &&
                         content.charAt(content.length() - 1) == ' ' &&
-                        Parsing.hasNonSpace(content)) {
+                        Characters.hasNonSpace(content)) {
                     content = content.substring(1, content.length() - 1);
                 }
 

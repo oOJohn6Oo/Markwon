@@ -24,8 +24,10 @@ public class BackslashInlineProcessor extends InlineProcessor {
         char nextChar = peek();
 
         if(nextChar == '(' || nextChar == ')'
-        || nextChar == '[' || nextChar == ']')
+        || nextChar == '[' || nextChar == ']'){
+            index--;
             return null;
+        }
 
         if (nextChar == '\n') {
             node = new HardLineBreak();
